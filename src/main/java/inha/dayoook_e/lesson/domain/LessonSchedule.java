@@ -26,9 +26,9 @@ public class LessonSchedule {
     @Enumerated(EnumType.STRING)
     private Status status; // 수업 상태
 
-    //출석 여부
+
     @Column(nullable = false)
-    private Boolean attendance;
+    private Boolean attendance; //출석 여부
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tutor_id", nullable = false)
