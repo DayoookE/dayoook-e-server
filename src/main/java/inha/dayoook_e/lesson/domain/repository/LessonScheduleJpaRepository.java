@@ -1,7 +1,6 @@
 package inha.dayoook_e.lesson.domain.repository;
 
 import inha.dayoook_e.lesson.domain.LessonSchedule;
-import inha.dayoook_e.tutor.domain.TutorApplication;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
