@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * TuteeSongProgressJpaRepository는 TuteeSongProgress 엔티티에 대한 데이터 액세스 기능을 제공.
@@ -23,4 +24,6 @@ public interface TuteeSongProgressJpaRepository extends JpaRepository<TuteeSongP
             @Param("tuteeId") Integer tuteeId,
             @Param("songIds") List<Integer> songIds
     );
+
+    Optional<TuteeSongProgress> findByTutee_IdAndSong_Id(Integer tuteeId, Integer songId);
 }

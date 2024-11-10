@@ -1,11 +1,14 @@
 package inha.dayoook_e.song.api.service;
 
 import inha.dayoook_e.common.exceptions.BaseException;
+import inha.dayoook_e.mapping.api.dto.response.SearchCountryResponse;
+import inha.dayoook_e.mapping.api.mapper.MappingMapper;
 import inha.dayoook_e.mapping.domain.Country;
 import inha.dayoook_e.mapping.domain.repository.CountryJpaRepository;
 import inha.dayoook_e.song.api.controller.dto.request.CreateSongRequest;
 import inha.dayoook_e.song.api.controller.dto.response.SongResponse;
 import inha.dayoook_e.song.api.controller.dto.response.SongSearchPageResponse;
+import inha.dayoook_e.song.api.controller.dto.response.SongSearchResponse;
 import inha.dayoook_e.song.api.mapper.SongMapper;
 import inha.dayoook_e.song.domain.Song;
 import inha.dayoook_e.song.domain.TuteeSongProgress;
@@ -28,6 +31,7 @@ import java.util.stream.Collectors;
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.common.Constant.*;
 import static inha.dayoook_e.common.code.status.ErrorStatus.COUNTRY_NOT_FOUND;
+import static inha.dayoook_e.common.code.status.ErrorStatus.SONG_NOT_FOUND;
 
 /**
  * SongServiceImpl은 동요 관련 비즈니스 로직을 처리하는 서비스 클래스.
@@ -42,6 +46,7 @@ public class SongServiceImpl implements SongService {
     private final TuteeSongProgressJpaRepository tuteeSongProgressJpaRepository;
     private final CountryJpaRepository countryJpaRepository;
     private final SongMapper songMapper;
+    private final MappingMapper mappingMapper;
     private final S3Provider s3Provider;
 
     /**
@@ -78,6 +83,38 @@ public class SongServiceImpl implements SongService {
             boolean completed = progress != null && progress.getIsCompleted();
             return songMapper.songToSongSearchPageResponse(song, liked, completed);
         });
+    }
+
+    /**
+     * 동요 조회
+     *
+     * @param user 로그인한 사용자
+     * @param countryId 국가 ID
+     * @param songId 노래 ID
+     * @return 동요 조회 결과
+     */
+    @Override
+    public SongSearchResponse getSong(User user, Integer countryId, Integer songId) {
+        // 1. 국가 ID와 노래 ID로 노래 조회
+        Song song = songJpaRepository.findByIdAndCountry_IdAndState(songId, countryId, ACTIVE)
+                .orElseThrow(() -> new BaseException(SONG_NOT_FOUND));
+
+        // 2. 해당 사용자의 노래 진행상황 조회
+        TuteeSongProgress progress = tuteeSongProgressJpaRepository
+                .findByTutee_IdAndSong_Id(user.getId(), songId)
+                .orElse(null);
+
+        // 3. progress 정보가 없는 경우 기본값 false 사용
+        boolean liked = progress != null && progress.getLiked();
+        boolean completed = progress != null && progress.getIsCompleted();
+
+        // 4. 국가 정보 변환
+        SearchCountryResponse countryResponse = mappingMapper.toSearchCountryResponse(
+                song.getCountry().getId(),
+                song.getCountry().getName(),
+                song.getCountry().getFlagUrl()
+        );
+        return songMapper.songToSongSearchResponse(song, countryResponse, liked, completed);
     }
 
     /**

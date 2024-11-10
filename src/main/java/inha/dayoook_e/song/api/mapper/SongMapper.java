@@ -1,9 +1,11 @@
 package inha.dayoook_e.song.api.mapper;
 
+import inha.dayoook_e.mapping.api.dto.response.SearchCountryResponse;
 import inha.dayoook_e.mapping.domain.Country;
 import inha.dayoook_e.song.api.controller.dto.request.CreateSongRequest;
 import inha.dayoook_e.song.api.controller.dto.response.SongResponse;
 import inha.dayoook_e.song.api.controller.dto.response.SongSearchPageResponse;
+import inha.dayoook_e.song.api.controller.dto.response.SongSearchResponse;
 import inha.dayoook_e.song.domain.Song;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -44,4 +46,16 @@ public interface SongMapper {
      * @return SongSearchPageResponse
      */
     SongSearchPageResponse songToSongSearchPageResponse(Song song, boolean liked, boolean completed);
+
+    /**
+     * Song 엔티티를 SongSearchResponse로 변환
+     *
+     * @param song            동요 정보
+     * @param countryResponse 국가 정보
+     * @param liked           좋아요 누른 여부
+     * @param completed       완료 여부
+     * @return SongSearchResponse
+     */
+    @Mapping(target = "id", source = "song.id")
+    SongSearchResponse songToSongSearchResponse(Song song, SearchCountryResponse countryResponse, boolean liked, boolean completed);
 }

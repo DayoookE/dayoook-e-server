@@ -5,6 +5,7 @@ import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.song.api.controller.dto.request.CreateSongRequest;
 import inha.dayoook_e.song.api.controller.dto.response.SongResponse;
 import inha.dayoook_e.song.api.controller.dto.response.SongSearchPageResponse;
+import inha.dayoook_e.song.api.controller.dto.response.SongSearchResponse;
 import inha.dayoook_e.song.api.service.SongService;
 import inha.dayoook_e.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,8 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import static inha.dayoook_e.common.code.status.ErrorStatus.INVALID_PAGE;
-import static inha.dayoook_e.common.code.status.SuccessStatus.SONG_CREATE_OK;
-import static inha.dayoook_e.common.code.status.SuccessStatus.SONG_SEARCH_PAGE_OK;
+import static inha.dayoook_e.common.code.status.SuccessStatus.*;
 
 
 /**
@@ -56,6 +56,26 @@ public class SongController {
             throw new BaseException(INVALID_PAGE);
         }
         return BaseResponse.of(SONG_SEARCH_PAGE_OK, songService.getSongs(user, countryId, page - 1));
+    }
+
+    /**
+     * 동요 상세 조회 API
+     *
+     * <p>동요를 상세 조회합니다.</p>
+     *
+     * @param countryId 국가 인덱스
+     * @param user 로그인한 사용자
+     * @param songId 동요 ID
+     * @return 동요 상세 조회 결과를 포함하는 BaseResponse<SongSearchResponse>
+     */
+    @GetMapping("/{countryId}/{songId}")
+    @Operation(summary = "동요 상세 조회 API", description = "동요를 상세 조회합니다.")
+    public BaseResponse<SongSearchResponse> getSong(
+            @AuthenticationPrincipal User user,
+            @PathVariable("countryId") Integer countryId,
+            @PathVariable("songId") Integer songId
+    ) {
+        return BaseResponse.of(SONG_SEARCH_OK, songService.getSong(user, countryId, songId));
     }
 
     /**
