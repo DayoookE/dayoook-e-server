@@ -1,5 +1,6 @@
 package inha.dayoook_e.mapping.domain;
 
+import inha.dayoook_e.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

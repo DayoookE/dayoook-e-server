@@ -26,15 +26,24 @@ public enum ErrorStatus implements BaseErrorCode {
     NOT_FIND_USER(HttpStatus.NOT_FOUND, "USER4000", "유저를 찾을 수 없습니다."),
     NOT_APPROVED_USER(HttpStatus.FORBIDDEN, "USER4001", "승인되지 않은 유저입니다."),
     INVALID_LANGUAGE_ID(HttpStatus.BAD_REQUEST, "LANGUAGE4000", "유효하지 않은 언어 ID입니다."),
+    COUNTRY_NOT_FOUND(HttpStatus.NOT_FOUND, "COUNTRY4000", "국가를 찾을 수 없습니다."),
+
+    SONG_NOT_FOUND(HttpStatus.NOT_FOUND, "SONG4000", "동요를 찾을 수 없습니다."),
+    SONG_ALREADY_COMPLETE(HttpStatus.BAD_REQUEST, "SONG4001", "이미 완료한 동요입니다."),
 
     EMPTY_JWT(HttpStatus.UNAUTHORIZED, "JWT4000", "JWT를 입력해주세요"),
     INVALID_JWT(HttpStatus.UNAUTHORIZED, "JWT4001", "유효하지 않은 JWT입니다."),
     INVALID_USER_JWT(HttpStatus.FORBIDDEN, "JWT4002", "권한이 없는 유저의 접근입니다."),
     MISSING_AUTH_HEADER(HttpStatus.UNAUTHORIZED, "JWT4003","인증 헤더가 없습니다."),
 
+    INVALID_PAGE(HttpStatus.BAD_REQUEST, "PAGE4000", "유효하지 않은 페이지입니다."),
+
     //토큰 만료
     INVALID_JWT_EXPIRED(HttpStatus.UNAUTHORIZED, "JWT4004", "만료된 JWT입니다."),
     INVALID_JWT_SIGNATURE(HttpStatus.UNAUTHORIZED, "JWT4005", "유효하지 않은 서명입니다."),
+
+    S3_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "S34000", "S3 업로드에 실패하였습니다."),
+    FILE_CONVERT_ERROR(HttpStatus.BAD_REQUEST, "FILE4000", "파일 변환에 실패하였습니다."),
 
 
     TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "TOKEN4001", "토큰이 존재하지 않습니다."),

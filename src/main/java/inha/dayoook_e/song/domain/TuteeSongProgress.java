@@ -37,4 +37,11 @@ public class TuteeSongProgress {
     @JoinColumn(name = "song_id", nullable = false)
     private Song song;
 
+    public void toggleLike() {
+        this.liked = !this.liked;
+    }
+
+    public void completeSong() {
+        this.isCompleted = true;
+    }
 }

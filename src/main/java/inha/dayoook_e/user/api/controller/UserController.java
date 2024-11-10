@@ -22,7 +22,7 @@ import static inha.dayoook_e.common.code.status.SuccessStatus.TUTOR_SIGNUP_OK;
  * UserController은 유저 관련 엔드포인트를 처리.
  */
 @Slf4j
-@Tag(name = "user controller", description = "유저 API")
+@Tag(name = "user controller", description = "유저 관련 API")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/users")

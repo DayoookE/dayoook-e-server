@@ -5,6 +5,7 @@ import inha.dayoook_e.common.BaseEntity.State;
 import inha.dayoook_e.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import javax.swing.text.html.Option;
 import java.util.Optional;
 
 /**
@@ -30,4 +31,5 @@ public interface UserJpaRepository extends JpaRepository<User, Integer> {
      */
     boolean existsByEmailAndState(String email, State state);
 
+    Optional<User> findByIdAndState(Integer id, State state);
 }
