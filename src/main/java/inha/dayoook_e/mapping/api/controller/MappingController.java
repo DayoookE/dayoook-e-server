@@ -1,10 +1,7 @@
 package inha.dayoook_e.mapping.api.controller;
 
 import inha.dayoook_e.common.BaseResponse;
-import inha.dayoook_e.mapping.api.controller.dto.response.SearchAgeGroupResponse;
-import inha.dayoook_e.mapping.api.controller.dto.response.SearchCountryResponse;
-import inha.dayoook_e.mapping.api.controller.dto.response.SearchDayResponse;
-import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
+import inha.dayoook_e.mapping.api.controller.dto.response.*;
 import inha.dayoook_e.mapping.api.service.MappingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -63,10 +60,26 @@ public class MappingController {
         return BaseResponse.of(AGE_GROUPS_SEARCH_OK, mappingService.getAgeGroups());
     }
 
+    /**
+     * 요일 목록 조회 API
+     *
+     * @return 요일 목록
+     */
     @GetMapping("/days")
     @Operation(summary = "요일 목록 조회 API", description = "요일 목록을 조회합니다.")
     public BaseResponse<List<SearchDayResponse>> getDays() {
         return BaseResponse.of(DAYS_SEARCH_OK, mappingService.getDays());
+    }
+
+    /**
+     * 시간대 목록 조회 API
+     *
+     * @return 시간대 목록
+     */
+    @GetMapping("/timeSlots")
+    @Operation(summary = "시간대 목록 조회 API", description = "시간대 목록을 조회합니다.")
+    public BaseResponse<List<SearchTimeSlotResponse>> getTimeSlots() {
+        return BaseResponse.of(TIME_SLOTS_SEARCH_OK, mappingService.getTimeSlots());
     }
 
 

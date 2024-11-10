@@ -1,14 +1,8 @@
 package inha.dayoook_e.mapping.api.service;
 
-import inha.dayoook_e.mapping.api.controller.dto.response.SearchAgeGroupResponse;
-import inha.dayoook_e.mapping.api.controller.dto.response.SearchCountryResponse;
-import inha.dayoook_e.mapping.api.controller.dto.response.SearchDayResponse;
-import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
+import inha.dayoook_e.mapping.api.controller.dto.response.*;
 import inha.dayoook_e.mapping.api.mapper.MappingMapper;
-import inha.dayoook_e.mapping.domain.repository.AgeGroupJpaRepository;
-import inha.dayoook_e.mapping.domain.repository.CountryJpaRepository;
-import inha.dayoook_e.mapping.domain.repository.DayJpaRepository;
-import inha.dayoook_e.mapping.domain.repository.LanguageJpaRepository;
+import inha.dayoook_e.mapping.domain.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,6 +24,7 @@ public class MappingServiceImpl implements MappingService{
     private final CountryJpaRepository countryJpaRepository;
     private final AgeGroupJpaRepository ageGroupJpaRepository;
     private final DayJpaRepository dayJpaRepository;
+    private final TimeSlotJpaRepository timeSlotJpaRepository;
     private final MappingMapper mappingMapper;
 
     /**
@@ -71,11 +66,29 @@ public class MappingServiceImpl implements MappingService{
                 .toList();
     }
 
+    /**
+     * 요일 목록을 조회합니다.
+     *
+     * @return 요일 목록
+     */
     @Override
     public List<SearchDayResponse> getDays() {
         return dayJpaRepository.findAll()
                 .stream()
                 .map(day -> mappingMapper.toSearchDayResponse(day.getId(), day.getName()))
+                .toList();
+    }
+
+    /**
+     * 시간대 목록을 조회합니다.
+     *
+     * @return 시간대 목록
+     */
+    @Override
+    public List<SearchTimeSlotResponse> getTimeSlots() {
+        return timeSlotJpaRepository.findAll()
+                .stream()
+                .map(timeSlot -> mappingMapper.toSearchTimeSlotResponse(timeSlot.getId(), timeSlot.getTime()))
                 .toList();
     }
 }

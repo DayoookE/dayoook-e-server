@@ -39,7 +39,8 @@ public class SecurityConfig {
             VERSION + "/languages",
             VERSION + "/countries",
             VERSION + "/ageGroups",
-            VERSION + "/days"
+            VERSION + "/days",
+            VERSION + "/timeSlots"
     };
     private static final String[] WHITE_LIST_URL = {
             "/",

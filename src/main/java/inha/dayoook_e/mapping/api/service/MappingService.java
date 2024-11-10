@@ -1,9 +1,6 @@
 package inha.dayoook_e.mapping.api.service;
 
-import inha.dayoook_e.mapping.api.controller.dto.response.SearchAgeGroupResponse;
-import inha.dayoook_e.mapping.api.controller.dto.response.SearchCountryResponse;
-import inha.dayoook_e.mapping.api.controller.dto.response.SearchDayResponse;
-import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
+import inha.dayoook_e.mapping.api.controller.dto.response.*;
 
 import java.util.List;
 
@@ -12,4 +9,5 @@ public interface MappingService {
     List<SearchCountryResponse> getCountries();
     List<SearchAgeGroupResponse> getAgeGroups();
     List<SearchDayResponse> getDays();
+    List<SearchTimeSlotResponse> getTimeSlots();
 }
