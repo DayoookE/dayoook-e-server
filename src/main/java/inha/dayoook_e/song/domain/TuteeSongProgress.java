@@ -6,6 +6,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 
+/**
+ * TuteeSongProgress 엔티티는 튜티가 들은 동요 진행 상황
+ */
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
