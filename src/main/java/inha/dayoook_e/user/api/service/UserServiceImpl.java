@@ -17,6 +17,8 @@ import inha.dayoook_e.user.domain.User;
 import inha.dayoook_e.user.domain.UserLanguage;
 import inha.dayoook_e.user.domain.repository.UserJpaRepository;
 import inha.dayoook_e.user.domain.repository.UserLanguageJpaRepository;
+import inha.dayoook_e.utils.s3.S3Provider;
+import inha.dayoook_e.utils.s3.dto.request.S3UploadRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
+import static inha.dayoook_e.common.Constant.PROFILE_IMAGE_DIR;
 
 /**
  * UserServiceImpl은 유저 관련 비즈니스 로직을 처리하는 서비스 클래스.
@@ -48,6 +51,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final TuteeMapper tuteeMapper;
     private final TutorMapper tutorMapper;
+    private final S3Provider s3Provider;
     /**
      * 튜티 회원가입
      *
@@ -60,19 +64,18 @@ public class UserServiceImpl implements UserService {
         // 1. User 엔티티 생성
         User user = userMapper.usertoTuteeSignupRequest(tuteeSignupRequest);
         user.setPassword(passwordEncoder.encode(tuteeSignupRequest.password()));
-
-        // 2. 프로필 이미지 처리
-        String profileUrl = handleProfileImage(profileImage);
-        user.setProfileUrl(profileUrl);
-        // 3. User 저장
         User savedUser = userJpaRepository.save(user);
 
-        // 4. TuteeInfo 생성 및 저장
+        // 2. 프로필 이미지 처리
+        String profileUrl = handleProfileImage(profileImage, savedUser.getId());
+        user.setProfileUrl(profileUrl);
+
+        // 3. TuteeInfo 생성 및 저장
         TuteeInfo tuteeInfo = tuteeMapper.userToTuteeInfo(savedUser);
         tuteeInfo.setUser(savedUser);
         tuteeInfoJpaRepository.save(tuteeInfo);
 
-        // 5. 사용자 언어 정보 저장
+        // 4. 사용자 언어 정보 저장
         List<Language> languages = languageJpaRepository.findAllByIdInAndState(tuteeSignupRequest.languageIdList(), ACTIVE);
         List<UserLanguage> userLanguages = userMapper.toUserLanguages(
                 tuteeSignupRequest.languageIdList(),
@@ -89,20 +92,20 @@ public class UserServiceImpl implements UserService {
         // 1. User 엔티티 생성
         User user = userMapper.usertoTutorSignupRequest(tutorSignupRequest);
         user.setPassword(passwordEncoder.encode(tutorSignupRequest.password()));
-
-        // 프로필 이미지 처리
-        String profileUrl = handleProfileImage(profileImage);
-        user.setProfileUrl(profileUrl);
-
-        // User 저장
         User savedUser = userJpaRepository.save(user);
 
-        // TutorInfo 생성 및 저장
+        // 2. 프로필 이미지 처리
+        if(profileImage != null) {
+            String profileUrl = handleProfileImage(profileImage, savedUser.getId() );
+            user.setProfileUrl(profileUrl);
+        }
+
+        // 3. TutorInfo 생성 및 저장
         TutorInfo tutorInfo = tutorMapper.userToTutorInfo(savedUser, tutorSignupRequest);
         tutorInfo.setUser(savedUser);
         tutorInfoJpaRepository.save(tutorInfo);
 
-        // 사용자 언어 정보 저장
+        // 4. 사용자 언어 정보 저장
         List<Language> languages = languageJpaRepository.findAllByIdInAndState(tutorSignupRequest.languageIdList(), ACTIVE);
         List<UserLanguage> userLanguages = userMapper.toUserLanguages(
                 tutorSignupRequest.languageIdList(),
@@ -111,15 +114,19 @@ public class UserServiceImpl implements UserService {
         );
         userLanguageJpaRepository.saveAll(userLanguages);
 
-        // 튜터 경력 정보 저장
+        // 5. 튜터 경력 정보 저장
         experienceJpaRepository.saveAll(tutorMapper.toExperiences(savedUser, tutorSignupRequest.descriptionList()));
         return userMapper.userToSignupResponse(savedUser);
     }
 
 
-    private String handleProfileImage(MultipartFile profileImage) {
-        // TODO: 실제 이미지 업로드 로직 구현
-        // 임시로 더미 URL 반환
-        return "default-profile-url";
+    /**
+     * 프로필 이미지 처리
+     *
+     * @param profileImage 프로필 이미지
+     * @return S3 URL
+     */
+    private String handleProfileImage(MultipartFile profileImage, Integer userId) {
+        return s3Provider.multipartFileUpload(profileImage, new S3UploadRequest(userId, PROFILE_IMAGE_DIR));
     }
 }

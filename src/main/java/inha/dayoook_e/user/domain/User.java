@@ -46,7 +46,7 @@ public class User extends BaseEntity implements UserDetails {
     @Column(nullable = false)
     private Integer age; // 나이
 
-    @Column(name = "profile_url",nullable = false, length = 100)
+    @Column(name = "profile_url", length = 100)
     private String profileUrl; // 프로필 이미지 URL
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
