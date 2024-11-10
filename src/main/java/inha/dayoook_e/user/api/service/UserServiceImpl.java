@@ -30,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.common.Constant.PROFILE_IMAGE_DIR;
 
 /**
@@ -80,7 +79,7 @@ public class UserServiceImpl implements UserService {
         tuteeInfoJpaRepository.save(tuteeInfo);
 
         // 4. 사용자 언어 정보 저장
-        List<Language> languages = languageJpaRepository.findAllByIdInAndState(tuteeSignupRequest.languageIdList(), ACTIVE);
+        List<Language> languages = languageJpaRepository.findAllByIdIn(tuteeSignupRequest.languageIdList());
         List<UserLanguage> userLanguages = userMapper.toUserLanguages(
                 tuteeSignupRequest.languageIdList(),
                 savedUser,
@@ -117,7 +116,7 @@ public class UserServiceImpl implements UserService {
         tutorInfoJpaRepository.save(tutorInfo);
 
         // 4. 사용자 언어 정보 저장
-        List<Language> languages = languageJpaRepository.findAllByIdInAndState(tutorSignupRequest.languageIdList(), ACTIVE);
+        List<Language> languages = languageJpaRepository.findAllByIdIn(tutorSignupRequest.languageIdList());
         List<UserLanguage> userLanguages = userMapper.toUserLanguages(
                 tutorSignupRequest.languageIdList(),
                 savedUser,

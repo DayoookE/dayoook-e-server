@@ -37,7 +37,8 @@ public class SecurityConfig {
 
     private static final String[] GET_ONLY_WHITE_LIST_URL = {
             VERSION + "/languages",
-            VERSION + "/countries"
+            VERSION + "/countries",
+            VERSION + "/ageGroups"
     };
     private static final String[] WHITE_LIST_URL = {
             "/",

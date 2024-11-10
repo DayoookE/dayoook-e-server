@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 @Entity
 @Table(name = "country_tb")
-public class Country extends BaseEntity {
+public class Country {
 
     @Id
     @Column(name = "country_id", nullable = false, updatable = false)

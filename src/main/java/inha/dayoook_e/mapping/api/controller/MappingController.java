@@ -1,6 +1,7 @@
 package inha.dayoook_e.mapping.api.controller;
 
 import inha.dayoook_e.common.BaseResponse;
+import inha.dayoook_e.mapping.api.controller.dto.response.SearchAgeGroupResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchCountryResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
 import inha.dayoook_e.mapping.api.service.MappingService;
@@ -14,8 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static inha.dayoook_e.common.code.status.SuccessStatus.COUNTRIES_SEARCH_OK;
-import static inha.dayoook_e.common.code.status.SuccessStatus.LANGUAGES_SEARCH_OK;
+import static inha.dayoook_e.common.code.status.SuccessStatus.*;
 
 /**
  * MappingController은 매핑 관련 엔드포인트를 처리.
@@ -50,4 +50,17 @@ public class MappingController {
     public BaseResponse<List<SearchCountryResponse>> getCountries() {
         return BaseResponse.of(COUNTRIES_SEARCH_OK, mappingService.getCountries());
     }
+
+    /**
+     * 연령대 목록 조회 API
+     *
+     * @return 연령대 목록
+     */
+    @GetMapping("/ageGroups")
+    @Operation(summary = "연령대 목록 조회 API", description = "연령대 목록을 조회합니다.")
+    public BaseResponse<List<SearchAgeGroupResponse>> getAgeGroups() {
+        return BaseResponse.of(AGE_GROUPS_SEARCH_OK, mappingService.getAgeGroups());
+    }
+
+
 }

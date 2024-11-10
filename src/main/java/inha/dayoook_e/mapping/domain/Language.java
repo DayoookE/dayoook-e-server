@@ -19,7 +19,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "language_tb")
-public class Language extends BaseEntity {
+public class Language {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

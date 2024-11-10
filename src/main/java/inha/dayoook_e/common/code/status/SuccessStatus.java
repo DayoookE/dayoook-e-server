@@ -27,7 +27,8 @@ public enum SuccessStatus implements BaseCode {
     SONG_COMPLETE_OK(HttpStatus.OK, "SONG2004", "동요 완료 성공"),
 
     LANGUAGES_SEARCH_OK(HttpStatus.OK, "MAPPING2000", "언어 목록 조회 성공"),
-    COUNTRIES_SEARCH_OK(HttpStatus.OK, "MAPPING2001", "국가 목록 조회 성공");
+    COUNTRIES_SEARCH_OK(HttpStatus.OK, "MAPPING2001", "국가 목록 조회 성공"),
+    AGE_GROUPS_SEARCH_OK(HttpStatus.OK, "MAPPING2002", "연령대 목록 조회 성공");
 
     private final HttpStatus httpStatus;
     private final String code;
