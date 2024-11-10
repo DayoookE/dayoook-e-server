@@ -3,6 +3,7 @@ package inha.dayoook_e.user.api.mapper;
 import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.mapping.domain.Language;
 import inha.dayoook_e.user.api.controller.dto.request.TuteeSignupRequest;
+import inha.dayoook_e.user.api.controller.dto.request.TutorSignupRequest;
 import inha.dayoook_e.user.api.controller.dto.response.SignupResponse;
 import inha.dayoook_e.user.domain.User;
 import inha.dayoook_e.user.domain.UserLanguage;
@@ -29,6 +30,15 @@ public interface UserMapper {
      */
     @Mapping(target = "role", constant = "TUTEE")
     User usertoTuteeSignupRequest(TuteeSignupRequest tuteeSignupRequest);
+
+    /**
+     * TutorSignupRequest를 User 엔티티로 변환
+     *
+     * @param tutorSignupRequest 튜터 회원가입 요청
+     * @return User 엔티티
+     */
+    @Mapping(target = "role", constant = "TUTOR")
+    User usertoTutorSignupRequest(TutorSignupRequest tutorSignupRequest);
 
 
     /**
@@ -66,4 +76,6 @@ public interface UserMapper {
      * @return SignupResponse
      */
     SignupResponse userToSignupResponse(User savedUser);
+
+
 }

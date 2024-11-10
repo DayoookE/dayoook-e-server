@@ -17,7 +17,8 @@ public enum SuccessStatus implements BaseCode {
 
     LOGIN_OK(HttpStatus.OK, "AUTH2000", "로그인 성공"),
 
-    TUTEE_SIGNUP_OK(HttpStatus.CREATED, "USER2010", "튜티 회원가입 성공");
+    TUTEE_SIGNUP_OK(HttpStatus.CREATED, "USER2010", "튜티 회원가입 성공"),
+    TUTOR_SIGNUP_OK(HttpStatus.CREATED, "USER2011", "튜터 회원가입 성공");
 
     private final HttpStatus httpStatus;
     private final String code;
