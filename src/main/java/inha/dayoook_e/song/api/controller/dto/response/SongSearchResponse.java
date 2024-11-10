@@ -1,6 +1,6 @@
 package inha.dayoook_e.song.api.controller.dto.response;
 
-import inha.dayoook_e.mapping.api.dto.response.SearchCountryResponse;
+import inha.dayoook_e.mapping.api.controller.dto.response.SearchCountryResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 

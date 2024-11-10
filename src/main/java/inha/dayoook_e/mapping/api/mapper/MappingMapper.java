@@ -1,6 +1,7 @@
 package inha.dayoook_e.mapping.api.mapper;
 
-import inha.dayoook_e.mapping.api.dto.response.SearchCountryResponse;
+import inha.dayoook_e.mapping.api.controller.dto.response.SearchCountryResponse;
+import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
 import inha.dayoook_e.user.domain.Point;
 import inha.dayoook_e.user.domain.User;
 import org.mapstruct.Mapper;
@@ -24,6 +25,15 @@ public interface MappingMapper {
      * @return 국가 조회 응답 DTO
      */
     SearchCountryResponse toSearchCountryResponse(Integer id, String name, String flagUrl);
+
+    /**
+     * 언어 조회 응답 DTO 생성
+     *
+     * @param id 언어 ID
+     * @param name 언어 이름
+     * @return 언어 조회 응답 DTO
+     */
+    SearchLanguagesResponse toSearchLanguagesResponse(Integer id, String name);
 
     /**
      * 포인트 생성

@@ -1,7 +1,7 @@
 package inha.dayoook_e.song.api.service;
 
 import inha.dayoook_e.common.exceptions.BaseException;
-import inha.dayoook_e.mapping.api.dto.response.SearchCountryResponse;
+import inha.dayoook_e.mapping.api.controller.dto.response.SearchCountryResponse;
 import inha.dayoook_e.mapping.api.mapper.MappingMapper;
 import inha.dayoook_e.mapping.domain.Country;
 import inha.dayoook_e.mapping.domain.repository.CountryJpaRepository;

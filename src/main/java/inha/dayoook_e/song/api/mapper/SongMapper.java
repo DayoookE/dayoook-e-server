@@ -1,6 +1,6 @@
 package inha.dayoook_e.song.api.mapper;
 
-import inha.dayoook_e.mapping.api.dto.response.SearchCountryResponse;
+import inha.dayoook_e.mapping.api.controller.dto.response.SearchCountryResponse;
 import inha.dayoook_e.mapping.domain.Country;
 import inha.dayoook_e.song.api.controller.dto.request.CreateSongRequest;
 import inha.dayoook_e.song.api.controller.dto.response.LikedTuteeSongProgressResponse;

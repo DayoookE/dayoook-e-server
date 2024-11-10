@@ -34,7 +34,7 @@ public class SecurityConfig {
     private static final String TUTOR_URL = "/api/v1/tutor/**";
 
     private static final String[] GET_ONLY_WHITE_LIST_URL = {
-
+            "/api/v1/languages"
     };
     private static final String[] WHITE_LIST_URL = {
             "/",
