@@ -1,7 +1,9 @@
 package inha.dayoook_e.mapping.api.service;
 
+import inha.dayoook_e.mapping.api.controller.dto.response.SearchCountryResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
 import inha.dayoook_e.mapping.api.mapper.MappingMapper;
+import inha.dayoook_e.mapping.domain.repository.CountryJpaRepository;
 import inha.dayoook_e.mapping.domain.repository.LanguageJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +24,7 @@ import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 public class MappingServiceImpl implements MappingService{
 
     private final LanguageJpaRepository languageJpaRepository;
+    private final CountryJpaRepository countryJpaRepository;
     private final MappingMapper mappingMapper;
 
     /**
@@ -34,6 +37,19 @@ public class MappingServiceImpl implements MappingService{
         return languageJpaRepository.findAllByState(ACTIVE)
                 .stream()
                 .map(language -> mappingMapper.toSearchLanguagesResponse(language.id(), language.name()))
+                .toList();
+    }
+
+    /**
+     * 국가 목록을 조회합니다.
+     *
+     * @return 국가 목록
+     */
+    @Override
+    public List<SearchCountryResponse> getCountries() {
+        return countryJpaRepository.findAllByState(ACTIVE)
+                .stream()
+                .map(country -> mappingMapper.toSearchCountryResponse(country.id(), country.name(), country.flagUrl()))
                 .toList();
     }
 }

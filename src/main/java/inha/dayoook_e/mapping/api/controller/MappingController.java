@@ -1,6 +1,7 @@
 package inha.dayoook_e.mapping.api.controller;
 
 import inha.dayoook_e.common.BaseResponse;
+import inha.dayoook_e.mapping.api.controller.dto.response.SearchCountryResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
 import inha.dayoook_e.mapping.api.service.MappingService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static inha.dayoook_e.common.code.status.SuccessStatus.COUNTRIES_SEARCH_OK;
 import static inha.dayoook_e.common.code.status.SuccessStatus.LANGUAGES_SEARCH_OK;
 
 /**
@@ -36,5 +38,16 @@ public class MappingController {
     @Operation(summary = "언어 목록 조회 API", description = "언어 목록을 조회합니다.")
     public BaseResponse<List<SearchLanguagesResponse>> getLanguages() {
         return BaseResponse.of(LANGUAGES_SEARCH_OK, mappingService.getLanguages());
+    }
+
+    /**
+     * 국가 목록 조회 API
+     *
+     * @return 국가 목록
+     */
+    @GetMapping("/countries")
+    @Operation(summary = "국가 목록 조회 API", description = "국가 목록을 조회합니다.")
+    public BaseResponse<List<SearchCountryResponse>> getCountries() {
+        return BaseResponse.of(COUNTRIES_SEARCH_OK, mappingService.getCountries());
     }
 }

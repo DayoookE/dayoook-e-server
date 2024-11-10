@@ -120,7 +120,7 @@ public class SongServiceImpl implements SongService {
     @Override
     public SongResponse createSong(User user, CreateSongRequest createSongRequest, MultipartFile thumbnail, MultipartFile media) {
         // 1. 국가 조회
-        Country country = countryJpaRepository.findById(createSongRequest.countryId())
+        Country country = countryJpaRepository.findByIdAndState(createSongRequest.countryId(), ACTIVE)
                 .orElseThrow(() -> new BaseException(COUNTRY_NOT_FOUND));
 
         // 2. S3에 파일 업로드

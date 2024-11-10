@@ -27,21 +27,24 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    private static final String VERSION = "/api/v1";
+
     // 관리자 전용 경로
-    private static final String ADMIN_URL = "/api/v1/admin/**";
+    private static final String ADMIN_URL = VERSION + "/admin/**";
 
     // 튜터 전용 경로
-    private static final String TUTOR_URL = "/api/v1/tutor/**";
+    private static final String TUTOR_URL = VERSION + "/tutor/**";
 
     private static final String[] GET_ONLY_WHITE_LIST_URL = {
-            "/api/v1/languages"
+            VERSION + "/languages",
+            VERSION + "/countries"
     };
     private static final String[] WHITE_LIST_URL = {
             "/",
-            "/api/v1/auth/**",
-            "/api/v1/test/**",
-            "/api/v1/users/tutee",
-            "/api/v1/users/tutor",
+            VERSION + "/auth/**",
+            VERSION + "/test/**",
+            VERSION + "/users/tutee",
+            VERSION + "/users/tutor",
             "/v2/api-docs",
             "/v3/api-docs",
             "/v3/api-docs/**",
@@ -100,7 +103,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authenticationProvider(authenticationProvider)
                 .logout(logout ->
-                        logout.logoutUrl("/api/v1/auth/logout")
+                        logout.logoutUrl(VERSION + "/auth/logout")
                                 .addLogoutHandler(logoutHandler)
                                 .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
 
