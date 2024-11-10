@@ -33,6 +33,8 @@ public enum ErrorStatus implements BaseErrorCode {
     INVALID_USER_JWT(HttpStatus.FORBIDDEN, "JWT4002", "권한이 없는 유저의 접근입니다."),
     MISSING_AUTH_HEADER(HttpStatus.UNAUTHORIZED, "JWT4003","인증 헤더가 없습니다."),
 
+    INVALID_PAGE(HttpStatus.BAD_REQUEST, "PAGE4000", "유효하지 않은 페이지입니다."),
+
     //토큰 만료
     INVALID_JWT_EXPIRED(HttpStatus.UNAUTHORIZED, "JWT4004", "만료된 JWT입니다."),
     INVALID_JWT_SIGNATURE(HttpStatus.UNAUTHORIZED, "JWT4005", "유효하지 않은 서명입니다."),

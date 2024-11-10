@@ -2,6 +2,8 @@ package inha.dayoook_e.user.api.service;
 
 import inha.dayoook_e.mapping.domain.Language;
 import inha.dayoook_e.mapping.domain.repository.LanguageJpaRepository;
+import inha.dayoook_e.song.domain.repository.SongJpaRepository;
+import inha.dayoook_e.song.domain.repository.TuteeSongProgressJpaRepository;
 import inha.dayoook_e.tutee.api.mapper.TuteeMapper;
 import inha.dayoook_e.tutee.domain.TuteeInfo;
 import inha.dayoook_e.tutee.domain.repository.TuteeInfoJpaRepository;
@@ -47,6 +49,8 @@ public class UserServiceImpl implements UserService {
     private final ExperienceJpaRepository experienceJpaRepository;
     private final UserLanguageJpaRepository userLanguageJpaRepository;
     private final LanguageJpaRepository languageJpaRepository;
+    private final SongJpaRepository songJpaRepository;
+    private final TuteeSongProgressJpaRepository tuteeSongProgressJpaRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final TuteeMapper tuteeMapper;
@@ -87,6 +91,13 @@ public class UserServiceImpl implements UserService {
         return userMapper.userToSignupResponse(savedUser);
     }
 
+    /**
+     * 튜터 회원가입
+     *
+     * @param tutorSignupRequest 튜터 회원가입 요청
+     * @param profileImage 프로필 이미지
+     * @return 회원가입 응답
+     */
     @Override
     public SignupResponse tutorSignup(TutorSignupRequest tutorSignupRequest, MultipartFile profileImage) {
         // 1. User 엔티티 생성

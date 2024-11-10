@@ -20,7 +20,8 @@ public enum SuccessStatus implements BaseCode {
     TUTEE_SIGNUP_OK(HttpStatus.CREATED, "USER2010", "튜티 회원가입 성공"),
     TUTOR_SIGNUP_OK(HttpStatus.CREATED, "USER2011", "튜터 회원가입 성공"),
 
-    SONG_CREATE_OK(HttpStatus.CREATED, "SONG2000", "동요 생성 성공");
+    SONG_CREATE_OK(HttpStatus.CREATED, "SONG2000", "동요 생성 성공"),
+    SONG_SEARCH_PAGE_OK(HttpStatus.OK, "SONG2001", "동요 검색 성공");
 
     private final HttpStatus httpStatus;
     private final String code;

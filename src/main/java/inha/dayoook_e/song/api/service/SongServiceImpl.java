@@ -5,8 +5,10 @@ import inha.dayoook_e.mapping.domain.Country;
 import inha.dayoook_e.mapping.domain.repository.CountryJpaRepository;
 import inha.dayoook_e.song.api.controller.dto.request.CreateSongRequest;
 import inha.dayoook_e.song.api.controller.dto.response.SongResponse;
+import inha.dayoook_e.song.api.controller.dto.response.SongSearchPageResponse;
 import inha.dayoook_e.song.api.mapper.SongMapper;
 import inha.dayoook_e.song.domain.Song;
+import inha.dayoook_e.song.domain.TuteeSongProgress;
 import inha.dayoook_e.song.domain.repository.SongJpaRepository;
 import inha.dayoook_e.song.domain.repository.TuteeSongProgressJpaRepository;
 import inha.dayoook_e.user.domain.User;
@@ -14,10 +16,16 @@ import inha.dayoook_e.utils.s3.S3Provider;
 import inha.dayoook_e.utils.s3.dto.request.S3UploadRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.common.Constant.*;
 import static inha.dayoook_e.common.code.status.ErrorStatus.COUNTRY_NOT_FOUND;
 
@@ -35,6 +43,42 @@ public class SongServiceImpl implements SongService {
     private final CountryJpaRepository countryJpaRepository;
     private final SongMapper songMapper;
     private final S3Provider s3Provider;
+
+    /**
+     * 동요 조회
+     *
+     * @param user 로그인한 사용자
+     * @param countryId 국가 ID
+     * @param page 페이지 번호
+     * @return 동요 조회 결과
+     */
+    @Override
+    public Slice<SongSearchPageResponse> getSongs(User user, Integer countryId, Integer page) {
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, CREATE_AT));
+
+        // 1. 해당 국가의 모든 노래를 슬라이싱하여 가져옴
+        Slice<Song> songs = songJpaRepository.findAllByCountry_IdAndState(countryId, pageable, ACTIVE);
+
+        // 2. TuteeSongProgress 조회를 위한 노래 ID 리스트
+        List<Integer> songIds = songs.getContent().stream()
+                .map(Song::getId)
+                .toList();
+
+        // 3. 유저의 진행상황 맵 생성 (노래 ID를 키로 사용)
+        Map<Integer, TuteeSongProgress> progressMap = tuteeSongProgressJpaRepository
+                .findAllByTutee_IdAndSong_IdIn(user.getId(), songIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        progress -> progress.getSong().getId(),
+                        progress -> progress
+                ));
+        return songs.map(song -> {
+            TuteeSongProgress progress = progressMap.get(song.getId());
+            boolean liked = progress != null && progress.getLiked();
+            boolean completed = progress != null && progress.getIsCompleted();
+            return songMapper.songToSongSearchPageResponse(song, liked, completed);
+        });
+    }
 
     /**
      * 동요 생성

@@ -1,5 +1,6 @@
 package inha.dayoook_e.song.domain;
 
+import inha.dayoook_e.common.BaseEntity;
 import inha.dayoook_e.mapping.domain.Country;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,7 +15,7 @@ import lombok.*;
 @Builder
 @Entity
 @Table(name = "song_tb")
-public class Song {
+public class Song extends BaseEntity {
 
     @Id
     @Column(name = "song_id", nullable = false, updatable = false)
