@@ -1,5 +1,6 @@
 package inha.dayoook_e.mapping.domain;
 
+import inha.dayoook_e.common.BaseEntity;
 import inha.dayoook_e.user.domain.UserLanguage;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,7 +19,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "language_tb")
-public class Language {
+public class Language extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
