@@ -6,6 +6,7 @@ import inha.dayoook_e.mapping.api.mapper.MappingMapper;
 import inha.dayoook_e.mapping.domain.Country;
 import inha.dayoook_e.mapping.domain.repository.CountryJpaRepository;
 import inha.dayoook_e.song.api.controller.dto.request.CreateSongRequest;
+import inha.dayoook_e.song.api.controller.dto.response.LikedTuteeSongProgressResponse;
 import inha.dayoook_e.song.api.controller.dto.response.SongResponse;
 import inha.dayoook_e.song.api.controller.dto.response.SongSearchPageResponse;
 import inha.dayoook_e.song.api.controller.dto.response.SongSearchResponse;
@@ -58,6 +59,7 @@ public class SongServiceImpl implements SongService {
      * @return 동요 조회 결과
      */
     @Override
+    @Transactional(readOnly = true)
     public Slice<SongSearchPageResponse> getSongs(User user, Integer countryId, Integer page) {
         Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, CREATE_AT));
 
@@ -94,6 +96,7 @@ public class SongServiceImpl implements SongService {
      * @return 동요 조회 결과
      */
     @Override
+    @Transactional(readOnly = true)
     public SongSearchResponse getSong(User user, Integer countryId, Integer songId) {
         // 1. 국가 ID와 노래 ID로 노래 조회
         Song song = songJpaRepository.findByIdAndCountry_IdAndState(songId, countryId, ACTIVE)
@@ -141,5 +144,30 @@ public class SongServiceImpl implements SongService {
         Song song = songMapper.createSongRequestToSong(createSongRequest, country, thumbnailUrl, mediaUrl);
         Song savedSong = songJpaRepository.save(song);
         return songMapper.songToSongResponse(savedSong);
+    }
+
+    /**
+     * 좋아요 토글
+     *
+     * @param user 로그인한 사용자
+     * @param songId 노래 ID
+     * @return 좋아요 토글 결과
+     */
+    @Override
+    public LikedTuteeSongProgressResponse toggleLike(User user, Integer songId) {
+        // 1. 노래 조회
+        Song song = songJpaRepository.findById(songId)
+                .orElseThrow(() -> new BaseException(SONG_NOT_FOUND));
+
+        // 2. 사용자의 노래 진행상황 조회 또는 생성
+        TuteeSongProgress progress = tuteeSongProgressJpaRepository
+                .findByTutee_IdAndSong_Id(user.getId(), songId)
+                .orElse(songMapper.toTuteeSongProgress(user, song));
+
+        // 3. 좋아요 토글
+        progress.toggleLike();
+
+        tuteeSongProgressJpaRepository.save(progress);
+        return songMapper.tuteeSongProgressToLikedTuteeSongProgressResponse(progress);
     }
 }

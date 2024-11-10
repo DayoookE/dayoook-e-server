@@ -3,6 +3,7 @@ package inha.dayoook_e.song.api.controller;
 import inha.dayoook_e.common.BaseResponse;
 import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.song.api.controller.dto.request.CreateSongRequest;
+import inha.dayoook_e.song.api.controller.dto.response.LikedTuteeSongProgressResponse;
 import inha.dayoook_e.song.api.controller.dto.response.SongResponse;
 import inha.dayoook_e.song.api.controller.dto.response.SongSearchPageResponse;
 import inha.dayoook_e.song.api.controller.dto.response.SongSearchResponse;
@@ -28,7 +29,7 @@ import static inha.dayoook_e.common.code.status.SuccessStatus.*;
  * SongController은 동요 관련 엔드포인트를 처리.
  */
 @Slf4j
-@Tag(name = "song controller", description = "동요 API")
+@Tag(name = "song controller", description = "동요 관련 API")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/songs")
@@ -97,5 +98,22 @@ public class SongController {
                                                  @RequestPart("media") MultipartFile media) {
         return BaseResponse.of(SONG_CREATE_OK, songService.createSong(user, createSongRequest, thumbnail, media));
     }
+
+    /**
+     * 좋아요 토글 API
+     *
+     * <p>좋아요를 토글합니다.</p>
+     *
+     * @param user 로그인한 사용자
+     * @param songId 동요 ID
+     * @return 좋아요 토글 결과를 포함하는 BaseResponse<LikedTuteeSongProgressResponse>
+     */
+    @PostMapping("/{songId}/toggle-like")
+    @Operation(summary = "좋아요 토글 API", description = "좋아요를 토글합니다.")
+    public BaseResponse<LikedTuteeSongProgressResponse> toggleLike(@AuthenticationPrincipal User user,
+                                                                   @PathVariable("songId") Integer songId) {
+        return BaseResponse.of(SONG_TOGGLE_LIKE_OK, songService.toggleLike(user, songId));
+    }
+
 
 }

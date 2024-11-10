@@ -3,10 +3,14 @@ package inha.dayoook_e.song.api.mapper;
 import inha.dayoook_e.mapping.api.dto.response.SearchCountryResponse;
 import inha.dayoook_e.mapping.domain.Country;
 import inha.dayoook_e.song.api.controller.dto.request.CreateSongRequest;
+import inha.dayoook_e.song.api.controller.dto.response.LikedTuteeSongProgressResponse;
 import inha.dayoook_e.song.api.controller.dto.response.SongResponse;
 import inha.dayoook_e.song.api.controller.dto.response.SongSearchPageResponse;
 import inha.dayoook_e.song.api.controller.dto.response.SongSearchResponse;
 import inha.dayoook_e.song.domain.Song;
+import inha.dayoook_e.song.domain.TuteeSongProgress;
+import inha.dayoook_e.song.domain.id.TuteeSongProgressId;
+import inha.dayoook_e.user.domain.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
@@ -58,4 +62,24 @@ public interface SongMapper {
      */
     @Mapping(target = "id", source = "song.id")
     SongSearchResponse songToSongSearchResponse(Song song, SearchCountryResponse countryResponse, boolean liked, boolean completed);
+
+    /**
+     * User와 Song을 TuteeSongProgress로 변환
+     *
+     * @param user 사용자
+     * @param song 노래
+     * @return TuteeSongProgress
+     */
+    default TuteeSongProgress toTuteeSongProgress(User user, Song song) {
+        return new TuteeSongProgress(new TuteeSongProgressId(user.getId(), song.getId()), false, false, user, song);
+    }
+
+    /**
+     * TuteeSongProgress 엔티티를 LikedTuteeSongProgressResponse로 변환
+     *
+     * @param tuteeSongProgress 튜티 동요 진행 상황 정보
+     * @return LikedTuteeSongProgressResponse
+     */
+    @Mapping(target = "id", source = "tuteeSongProgress.id.songId")
+    LikedTuteeSongProgressResponse tuteeSongProgressToLikedTuteeSongProgressResponse(TuteeSongProgress tuteeSongProgress);
 }
