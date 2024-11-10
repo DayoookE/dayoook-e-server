@@ -17,7 +17,12 @@ import inha.dayoook_e.song.domain.TuteeSongProgress;
 import inha.dayoook_e.song.domain.repository.SongJpaRepository;
 import inha.dayoook_e.song.domain.repository.SongQueryRepository;
 import inha.dayoook_e.song.domain.repository.TuteeSongProgressJpaRepository;
+import inha.dayoook_e.tutee.domain.TuteeInfo;
+import inha.dayoook_e.tutee.domain.repository.TuteeInfoJpaRepository;
+import inha.dayoook_e.user.domain.Point;
 import inha.dayoook_e.user.domain.User;
+import inha.dayoook_e.user.domain.repository.PointJpaRepository;
+import inha.dayoook_e.user.domain.repository.UserJpaRepository;
 import inha.dayoook_e.utils.s3.S3Provider;
 import inha.dayoook_e.utils.s3.dto.request.S3UploadRequest;
 import lombok.RequiredArgsConstructor;
@@ -30,10 +35,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.common.Constant.*;
-import static inha.dayoook_e.common.code.status.ErrorStatus.COUNTRY_NOT_FOUND;
-import static inha.dayoook_e.common.code.status.ErrorStatus.SONG_NOT_FOUND;
+import static inha.dayoook_e.common.code.status.ErrorStatus.*;
 
 /**
  * SongServiceImpl은 동요 관련 비즈니스 로직을 처리하는 서비스 클래스.
@@ -47,6 +53,9 @@ public class SongServiceImpl implements SongService {
     private final SongJpaRepository songJpaRepository;
     private final TuteeSongProgressJpaRepository tuteeSongProgressJpaRepository;
     private final CountryJpaRepository countryJpaRepository;
+    private final PointJpaRepository pointJpaRepository;
+    private final TuteeInfoJpaRepository tuteeInfoJpaRepository;
+    private final UserJpaRepository userJpaRepository;
     private final SongMapper songMapper;
     private final MappingMapper mappingMapper;
     private final SongQueryRepository songQueryRepository;
@@ -148,5 +157,41 @@ public class SongServiceImpl implements SongService {
 
         tuteeSongProgressJpaRepository.save(progress);
         return songMapper.tuteeSongProgressToLikedTuteeSongProgressResponse(progress);
+    }
+
+    /**
+     * 노래 완료 처리
+     *
+     * @param user 로그인한 사용자
+     * @param songId 노래 ID
+     * @return 노래 완료 처리 결과
+     */
+    @Override
+    public SongResponse completeSong(User user, Integer songId) {
+        // 1. 노래 조회
+        Song song = songJpaRepository.findById(songId)
+                .orElseThrow(() -> new BaseException(SONG_NOT_FOUND));
+
+        // 2. 사용자의 노래 진행상황 조회 또는 생성
+        TuteeSongProgress progress = tuteeSongProgressJpaRepository
+                .findByTutee_IdAndSong_Id(user.getId(), songId)
+                .orElse(songMapper.toTuteeSongProgress(user, song));
+
+        // 3. 이미 완료된 노래인 경우 예외 처리
+        if(Boolean.TRUE.equals(progress.getIsCompleted())) {
+            throw new BaseException(SONG_ALREADY_COMPLETE);
+        }
+
+        // 4. 노래 완료 처리
+        progress.completeSong();
+        TuteeInfo tuteeInfo = tuteeInfoJpaRepository.findByuserId(user.getId())
+                .orElseThrow(() -> new BaseException(NOT_FIND_USER));
+        tuteeInfo.addPoint(20);
+        User findUser = userJpaRepository.findByIdAndState(user.getId(), ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_FIND_USER));
+        Point point = mappingMapper.createPoint(findUser, 20, songId + SONG_COMPLETE, LocalDateTime.now());
+        pointJpaRepository.save(point);
+        tuteeSongProgressJpaRepository.save(progress);
+        return songMapper.songToSongResponse(song);
     }
 }

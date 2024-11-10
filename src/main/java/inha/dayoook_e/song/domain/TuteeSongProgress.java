@@ -40,4 +40,8 @@ public class TuteeSongProgress {
     public void toggleLike() {
         this.liked = !this.liked;
     }
+
+    public void completeSong() {
+        this.isCompleted = true;
+    }
 }

@@ -113,5 +113,21 @@ public class SongController {
         return BaseResponse.of(SONG_TOGGLE_LIKE_OK, songService.toggleLike(user, songId));
     }
 
+    /**
+     * 동요 완료 API
+     *
+     * <p>동요 듣는 것을 완료합니다.</p>
+     *
+     * @param user 로그인한 사용자
+     * @param songId 동요 ID
+     * @return 동요 완료 결과를 포함하는 BaseResponse<SongResponse>
+     */
+    @PostMapping("/{songId}/complete")
+    @Operation(summary = "동요 완료 API", description = "동요 듣는 것을 완료합니다.")
+    public BaseResponse<SongResponse> completeSong(@AuthenticationPrincipal User user,
+                                                   @PathVariable("songId") Integer songId) {
+        return BaseResponse.of(SONG_COMPLETE_OK, songService.completeSong(user, songId));
+    }
+
 
 }

@@ -14,4 +14,12 @@ public class Constant {
 
     public final static String CREATE_AT = "createdAt";
 
+    //동요 완료 보상
+    public final static int COMPLETE_REWARD = 20;
+
+    //동요 완료 보상
+    public final static String SONG_COMPLETE = "_동요 완료 보상";
+
+
+
 }

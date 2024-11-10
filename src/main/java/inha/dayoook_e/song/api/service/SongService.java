@@ -16,4 +16,5 @@ public interface SongService {
     SongSearchResponse getSong(User user, Integer songId);
     SongResponse createSong(User user, CreateSongRequest createSongRequest, MultipartFile thumbnail, MultipartFile media);
     LikedTuteeSongProgressResponse toggleLike(User user, Integer songId);
+    SongResponse completeSong(User user, Integer songId);
 }

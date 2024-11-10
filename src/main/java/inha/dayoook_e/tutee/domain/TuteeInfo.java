@@ -39,4 +39,8 @@ public class TuteeInfo implements Serializable {
     public void setUser(User user) {
         this.user = user;
     }
+
+    public void addPoint(Integer point) {
+        this.point += point;
+    }
 }
