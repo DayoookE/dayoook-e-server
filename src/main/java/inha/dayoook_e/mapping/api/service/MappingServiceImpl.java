@@ -2,10 +2,12 @@ package inha.dayoook_e.mapping.api.service;
 
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchAgeGroupResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchCountryResponse;
+import inha.dayoook_e.mapping.api.controller.dto.response.SearchDayResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
 import inha.dayoook_e.mapping.api.mapper.MappingMapper;
 import inha.dayoook_e.mapping.domain.repository.AgeGroupJpaRepository;
 import inha.dayoook_e.mapping.domain.repository.CountryJpaRepository;
+import inha.dayoook_e.mapping.domain.repository.DayJpaRepository;
 import inha.dayoook_e.mapping.domain.repository.LanguageJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +29,7 @@ public class MappingServiceImpl implements MappingService{
     private final LanguageJpaRepository languageJpaRepository;
     private final CountryJpaRepository countryJpaRepository;
     private final AgeGroupJpaRepository ageGroupJpaRepository;
+    private final DayJpaRepository dayJpaRepository;
     private final MappingMapper mappingMapper;
 
     /**
@@ -65,6 +68,14 @@ public class MappingServiceImpl implements MappingService{
         return ageGroupJpaRepository.findAll()
                 .stream()
                 .map(ageGroup -> mappingMapper.toSearchAgeGroupResponse(ageGroup.getId(), ageGroup.getName()))
+                .toList();
+    }
+
+    @Override
+    public List<SearchDayResponse> getDays() {
+        return dayJpaRepository.findAll()
+                .stream()
+                .map(day -> mappingMapper.toSearchDayResponse(day.getId(), day.getName()))
                 .toList();
     }
 }

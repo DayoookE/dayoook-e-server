@@ -2,6 +2,7 @@ package inha.dayoook_e.mapping.api.mapper;
 
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchAgeGroupResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchCountryResponse;
+import inha.dayoook_e.mapping.api.controller.dto.response.SearchDayResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
 import inha.dayoook_e.user.domain.Point;
 import inha.dayoook_e.user.domain.User;
@@ -48,6 +49,15 @@ public interface MappingMapper {
     SearchLanguagesResponse toSearchLanguagesResponse(Integer id, String name);
 
     /**
+     * 요일 조회 응답 DTO 생성
+     *
+     * @param id 요일 ID
+     * @param name 요일 이름
+     * @return 요일 조회 응답 DTO
+     */
+    SearchDayResponse toSearchDayResponse(Integer id, String name);
+
+    /**
      * 포인트 생성
      *
      * @param user 유저
@@ -59,4 +69,6 @@ public interface MappingMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "user", source = "user")
     Point createPoint(User user, Integer point, String reason, LocalDateTime createdAt);
+
+
 }
