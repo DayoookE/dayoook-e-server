@@ -23,6 +23,8 @@ public enum ErrorStatus implements BaseErrorCode {
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "COMMON4005", "입력값이 올바르지 않습니다."),
     DUPLICATION_REQUEST(HttpStatus.BAD_REQUEST, "COMMON4006", "중복된 요청입니다."),
 
+    NOT_FIND_USER(HttpStatus.NOT_FOUND, "USER4000", "유저를 찾을 수 없습니다."),
+    NOT_APPROVED_USER(HttpStatus.FORBIDDEN, "USER4001", "승인되지 않은 유저입니다."),
     INVALID_LANGUAGE_ID(HttpStatus.BAD_REQUEST, "LANGUAGE4000", "유효하지 않은 언어 ID입니다."),
 
     EMPTY_JWT(HttpStatus.UNAUTHORIZED, "JWT4000", "JWT를 입력해주세요"),
