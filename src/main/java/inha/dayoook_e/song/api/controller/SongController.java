@@ -3,6 +3,7 @@ package inha.dayoook_e.song.api.controller;
 import inha.dayoook_e.common.BaseResponse;
 import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.song.api.controller.dto.request.CreateSongRequest;
+import inha.dayoook_e.song.api.controller.dto.request.SearchCond;
 import inha.dayoook_e.song.api.controller.dto.response.LikedTuteeSongProgressResponse;
 import inha.dayoook_e.song.api.controller.dto.response.SongResponse;
 import inha.dayoook_e.song.api.controller.dto.response.SongSearchPageResponse;
@@ -42,21 +43,21 @@ public class SongController {
      *
      * <p>동요를 조회합니다.</p>
      *
-     * @param countryId 국가 인덱스
+     * @param searchCond 검색 조건
      * @param page 페이지 번호
      * @return 동요 조회 결과를 포함하는 BaseResponse<Slice<SongSearchPageResponse>>
      */
-    @GetMapping("/{countryId}")
-    @Operation(summary = "동요 페이징 조회 API", description = "동요를 슬라이싱하여 조회합니다.")
+    @GetMapping
+    @Operation(summary = "동요 조건 조회 API", description = "동요를 조건 조회합니다.")
     public BaseResponse<Slice<SongSearchPageResponse>> getSongs(
             @AuthenticationPrincipal User user,
-            @PathVariable("countryId") Integer countryId,
+            @Validated @ModelAttribute SearchCond searchCond,
             @RequestParam("page") Integer page
     ) {
         if (page < 1) {
             throw new BaseException(INVALID_PAGE);
         }
-        return BaseResponse.of(SONG_SEARCH_PAGE_OK, songService.getSongs(user, countryId, page - 1));
+        return BaseResponse.of(SONG_SEARCH_PAGE_OK, songService.getSongs(user, searchCond, page - 1));
     }
 
     /**
@@ -64,19 +65,16 @@ public class SongController {
      *
      * <p>동요를 상세 조회합니다.</p>
      *
-     * @param countryId 국가 인덱스
      * @param user 로그인한 사용자
      * @param songId 동요 ID
      * @return 동요 상세 조회 결과를 포함하는 BaseResponse<SongSearchResponse>
      */
-    @GetMapping("/{countryId}/{songId}")
+    @GetMapping("/{songId}")
     @Operation(summary = "동요 상세 조회 API", description = "동요를 상세 조회합니다.")
     public BaseResponse<SongSearchResponse> getSong(
             @AuthenticationPrincipal User user,
-            @PathVariable("countryId") Integer countryId,
-            @PathVariable("songId") Integer songId
-    ) {
-        return BaseResponse.of(SONG_SEARCH_OK, songService.getSong(user, countryId, songId));
+            @PathVariable("songId") Integer songId) {
+        return BaseResponse.of(SONG_SEARCH_OK, songService.getSong(user, songId));
     }
 
     /**

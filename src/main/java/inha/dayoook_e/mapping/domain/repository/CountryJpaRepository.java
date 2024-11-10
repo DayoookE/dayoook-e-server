@@ -1,10 +1,8 @@
 package inha.dayoook_e.mapping.domain.repository;
 
-import inha.dayoook_e.common.BaseEntity;
 import inha.dayoook_e.mapping.domain.Country;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Collection;
 import java.util.List;
 
 /**

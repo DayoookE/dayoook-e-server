@@ -21,8 +21,7 @@ public enum SuccessStatus implements BaseCode {
     TUTOR_SIGNUP_OK(HttpStatus.CREATED, "USER2011", "튜터 회원가입 성공"),
 
     SONG_CREATE_OK(HttpStatus.CREATED, "SONG2000", "동요 생성 성공"),
-    SONG_SEARCH_PAGE_OK(HttpStatus.OK, "SONG2001", "동요 국가별 전체 검색 성공"),
-    //상세조회
+    SONG_SEARCH_PAGE_OK(HttpStatus.OK, "SONG2001", "동요 조건 검색 성공"),
     SONG_SEARCH_OK(HttpStatus.OK, "SONG2002", "동요 상세 조회 성공"),
     SONG_TOGGLE_LIKE_OK(HttpStatus.OK, "SONG2003", "동요 좋아요 토글 성공");
 
