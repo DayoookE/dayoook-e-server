@@ -50,4 +50,8 @@ public class TutorInfo implements Serializable {
 
     @OneToMany(mappedBy = "tutorInfo", fetch = FetchType.LAZY)
     private List<TutorAgeGroup> tutorAgeGroups = new ArrayList<>();
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

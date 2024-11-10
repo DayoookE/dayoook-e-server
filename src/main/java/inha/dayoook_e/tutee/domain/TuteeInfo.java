@@ -35,4 +35,8 @@ public class TuteeInfo implements Serializable {
     @MapsId
     @JoinColumn(name = "user_id")
     private User user;
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

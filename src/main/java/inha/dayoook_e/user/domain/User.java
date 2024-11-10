@@ -40,6 +40,9 @@ public class User extends BaseEntity implements UserDetails {
     @Column(nullable = false, length = 12)
     private String name; // 이름
 
+
+    private Boolean gender; // 성별
+
     @Column(nullable = false)
     private Integer age; // 나이
 
@@ -97,4 +100,11 @@ public class User extends BaseEntity implements UserDetails {
         return true;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setProfileUrl(String profileUrl) {
+        this.profileUrl = profileUrl;
+    }
 }

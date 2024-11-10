@@ -21,4 +21,13 @@ public interface UserJpaRepository extends JpaRepository<User, Integer> {
      */
     Optional<User> findByEmailAndState(String email, State state);
 
+    /**
+     * 사용자 email과 상태를 기반으로 사용자가 존재하는지 확인.
+     *
+     * @param email 찾으려는 사용자의 email
+     * @param state 찾으려는 사용자의 상태 (ACTIVE 또는 INACTIVE)
+     * @return 사용자가 존재하면 true, 존재하지 않으면 false
+     */
+    boolean existsByEmailAndState(String email, State state);
+
 }
