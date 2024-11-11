@@ -2,10 +2,7 @@ package inha.dayoook_e.storybook.api.mapper;
 
 import inha.dayoook_e.mapping.domain.Country;
 import inha.dayoook_e.storybook.api.controller.dto.request.CreateStorybookRequest;
-import inha.dayoook_e.storybook.api.controller.dto.response.LikedTuteeStorybookProgressResponse;
-import inha.dayoook_e.storybook.api.controller.dto.response.StorybookResponse;
-import inha.dayoook_e.storybook.api.controller.dto.response.StorybookSearchPageResponse;
-import inha.dayoook_e.storybook.api.controller.dto.response.StorybookSearchResponse;
+import inha.dayoook_e.storybook.api.controller.dto.response.*;
 import inha.dayoook_e.storybook.domain.Storybook;
 import inha.dayoook_e.storybook.domain.StorybookPage;
 import inha.dayoook_e.storybook.domain.TuteeStoryProgress;
@@ -96,4 +93,7 @@ public interface StorybookMapper {
      */
     @Mapping(target = "id", source = "storybook.id")
     StorybookSearchResponse storybookToStorybookSearchResponse(Storybook storybook, StorybookPage storybookPage, Boolean liked, Integer lastPageNumber, Boolean isCompleted);
+
+    @Mapping(target = "id", source = "storybook.id")
+    LastReadPageStorybookResponse tuteeStoryProgressToLastReadPageStorybookResponse(Storybook storybook, TuteeStoryProgress tuteeStoryProgress);
 }

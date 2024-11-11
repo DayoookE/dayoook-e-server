@@ -4,10 +4,7 @@ import inha.dayoook_e.common.BaseResponse;
 import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.storybook.api.controller.dto.request.CreateStorybookRequest;
 import inha.dayoook_e.storybook.api.controller.dto.request.SearchCond;
-import inha.dayoook_e.storybook.api.controller.dto.response.LikedTuteeStorybookProgressResponse;
-import inha.dayoook_e.storybook.api.controller.dto.response.StorybookResponse;
-import inha.dayoook_e.storybook.api.controller.dto.response.StorybookSearchPageResponse;
-import inha.dayoook_e.storybook.api.controller.dto.response.StorybookSearchResponse;
+import inha.dayoook_e.storybook.api.controller.dto.response.*;
 import inha.dayoook_e.storybook.api.service.StorybookService;
 import inha.dayoook_e.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -132,5 +129,23 @@ public class StorybookController {
     public BaseResponse<StorybookResponse> completeStorybook(@AuthenticationPrincipal User user,
                                                              @PathVariable("storybookId") Integer storybookId) {
         return BaseResponse.of(STORYBOOK_COMPLETE_OK, storybookService.completeStorybook(user, storybookId));
+    }
+
+    /**
+     * 마지막 읽은 페이지 업데이트 API
+     *
+     * <p>동화의 마지막으로 읽은 페이지 번호를 업데이트합니다.</p>
+     *
+     * @param user 로그인한 사용자
+     * @param storybookId 동화 id
+     * @param pageNumber 페이지 번호
+     * @return 마지막 읽은 페이지 업데이트 결과를 포함하는 BaseResponse<LastReadPageStorybookResponse>
+     */
+    @PostMapping("/{storybookId}/last-read-page")
+    @Operation(summary = "마지막 읽은 페이지 업데이트 API", description = "동화의 마지막으로 읽은 페이지 번호를 업데이트합니다.")
+    public BaseResponse<LastReadPageStorybookResponse> updateLastReadPage(@AuthenticationPrincipal User user,
+                                                                          @PathVariable("storybookId") Integer storybookId,
+                                                                          @RequestParam("pageNumber") Integer pageNumber) {
+        return BaseResponse.of(STORYBOOK_UPDATE_LAST_READ_PAGE_OK, storybookService.updateLastReadPage(user, storybookId, pageNumber));
     }
 }

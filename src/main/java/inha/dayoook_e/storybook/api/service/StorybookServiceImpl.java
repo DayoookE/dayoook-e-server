@@ -6,10 +6,7 @@ import inha.dayoook_e.mapping.domain.Country;
 import inha.dayoook_e.mapping.domain.repository.CountryJpaRepository;
 import inha.dayoook_e.storybook.api.controller.dto.request.SearchCond;
 import inha.dayoook_e.storybook.api.controller.dto.request.CreateStorybookRequest;
-import inha.dayoook_e.storybook.api.controller.dto.response.LikedTuteeStorybookProgressResponse;
-import inha.dayoook_e.storybook.api.controller.dto.response.StorybookResponse;
-import inha.dayoook_e.storybook.api.controller.dto.response.StorybookSearchPageResponse;
-import inha.dayoook_e.storybook.api.controller.dto.response.StorybookSearchResponse;
+import inha.dayoook_e.storybook.api.controller.dto.response.*;
 import inha.dayoook_e.storybook.api.mapper.StorybookMapper;
 import inha.dayoook_e.storybook.domain.Storybook;
 import inha.dayoook_e.storybook.domain.StorybookPage;
@@ -74,6 +71,7 @@ public class StorybookServiceImpl implements StorybookService {
      * @return 동화 목록 조회 결과
      */
     @Override
+    @Transactional(readOnly = true)
     public Slice<StorybookSearchPageResponse> getStorybooks(User user, SearchCond searchCond, Integer page) {
         Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, CREATE_AT));
         return storybookQueryRepository.searchStorybooks(user, searchCond, pageable);
@@ -88,6 +86,7 @@ public class StorybookServiceImpl implements StorybookService {
      * @return 동화 상세 조회 결과
      */
     @Override
+    @Transactional(readOnly = true)
     public StorybookSearchResponse getStorybook(User user, Integer storybookId, Integer pageNumber) {
         // 1. 동화 조회
         Storybook storybook = storybookJpaRepository.findByIdAndState(storybookId, ACTIVE)
@@ -198,12 +197,13 @@ public class StorybookServiceImpl implements StorybookService {
     public StorybookResponse completeStorybook(User user, Integer storybookId) {
 
         // 1. 동화 조회
-        storybookJpaRepository.findByIdAndState(storybookId, ACTIVE)
+        Storybook storybook = storybookJpaRepository.findByIdAndState(storybookId, ACTIVE)
                 .orElseThrow(() -> new BaseException(STORYBOOK_NOT_FOUND));
+
         // 2. 사용자의 동화 진행상황 조회 또는 생성
         TuteeStoryProgress progress = tuteeStoryProgressJpaRepository
                 .findByTutee_IdAndStorybook_Id(user.getId(), storybookId)
-                .orElseThrow(() -> new BaseException(STORYBOOK_NOT_FOUND));
+                .orElse(storybookMapper.toTuteeStoryProgress(user, storybook));
 
         // 3. 이미 완료된 동화인 경우 예외 처리
         if(Boolean.TRUE.equals(progress.getIsCompleted())) {
@@ -221,5 +221,33 @@ public class StorybookServiceImpl implements StorybookService {
         pointJpaRepository.save(point);
         tuteeStoryProgressJpaRepository.save(progress);
         return storybookMapper.storybookToStorybookResponse(progress.getStorybook());
+    }
+
+    /**
+     * 마지막으로 읽은 페이지 번호 업데이트
+     *
+     * @param user 로그인한 사용자
+     * @param storybookId 동화 ID
+     * @param pageNumber 페이지 번호
+     * @return 마지막으로 읽은 페이지 번호 업데이트 결과
+     */
+    @Override
+    public LastReadPageStorybookResponse updateLastReadPage(User user, Integer storybookId, Integer pageNumber) {
+        // 1. 동화 조회
+        Storybook storybook = storybookJpaRepository.findByIdAndState(storybookId, ACTIVE)
+                .orElseThrow(() -> new BaseException(STORYBOOK_NOT_FOUND));
+
+        // 2. 사용자의 동화 진행상황 조회 또는 생성
+        TuteeStoryProgress progress = tuteeStoryProgressJpaRepository
+                .findByTutee_IdAndStorybook_Id(user.getId(), storybookId)
+                .orElse(storybookMapper.toTuteeStoryProgress(user, storybook));
+
+        if(storybook.getPageCount() < pageNumber || pageNumber < 1) {
+            throw new BaseException(STORYBOOK_PAGE_NOT_FOUND);
+        }
+        // 3. 마지막으로 읽은 페이지 번호 업데이트
+        progress.updateLastReadPage(pageNumber);
+        tuteeStoryProgressJpaRepository.save(progress);
+        return storybookMapper.tuteeStoryProgressToLastReadPageStorybookResponse(storybook, progress);
     }
 }

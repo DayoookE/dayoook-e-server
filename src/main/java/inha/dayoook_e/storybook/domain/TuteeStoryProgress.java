@@ -47,4 +47,8 @@ public class TuteeStoryProgress {
     public void completeStory() {
         this.isCompleted = true;
     }
+
+    public void updateLastReadPage(Integer pageNumber) {
+        this.lastPageNumber = pageNumber;
+    }
 }
