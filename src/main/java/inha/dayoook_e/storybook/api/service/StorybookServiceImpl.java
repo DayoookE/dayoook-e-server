@@ -4,18 +4,18 @@ import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.mapping.api.mapper.MappingMapper;
 import inha.dayoook_e.mapping.domain.Country;
 import inha.dayoook_e.mapping.domain.repository.CountryJpaRepository;
-import inha.dayoook_e.song.api.controller.dto.response.SongResponse;
-import inha.dayoook_e.song.domain.Song;
-import inha.dayoook_e.song.domain.TuteeSongProgress;
+import inha.dayoook_e.storybook.api.controller.dto.request.SearchCond;
 import inha.dayoook_e.storybook.api.controller.dto.request.CreateStorybookRequest;
 import inha.dayoook_e.storybook.api.controller.dto.response.LikedTuteeStorybookProgressResponse;
 import inha.dayoook_e.storybook.api.controller.dto.response.StorybookResponse;
+import inha.dayoook_e.storybook.api.controller.dto.response.StorybookSearchPageResponse;
 import inha.dayoook_e.storybook.api.mapper.StorybookMapper;
 import inha.dayoook_e.storybook.domain.Storybook;
 import inha.dayoook_e.storybook.domain.StorybookPage;
 import inha.dayoook_e.storybook.domain.TuteeStoryProgress;
 import inha.dayoook_e.storybook.domain.repository.StorybookJpaRepository;
 import inha.dayoook_e.storybook.domain.repository.StorybookPageJpaRepository;
+import inha.dayoook_e.storybook.domain.repository.StorybookQueryRepository;
 import inha.dayoook_e.storybook.domain.repository.TuteeStoryProgressJpaRepository;
 import inha.dayoook_e.tutee.domain.TuteeInfo;
 import inha.dayoook_e.tutee.domain.repository.TuteeInfoJpaRepository;
@@ -27,6 +27,10 @@ import inha.dayoook_e.utils.s3.S3Provider;
 import inha.dayoook_e.utils.s3.dto.request.S3UploadRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -57,7 +61,22 @@ public class StorybookServiceImpl implements StorybookService {
     private final PointJpaRepository pointJpaRepository;
     private final StorybookMapper storybookMapper;
     private final MappingMapper mappingMapper;
+    private final StorybookQueryRepository storybookQueryRepository;
     private final S3Provider s3Provider;
+
+    /**
+     * 동화 목록 조회
+     *
+     * @param user 로그인한 사용자
+     * @param searchCond 검색 조건
+     * @param page 페이지 번호
+     * @return 동화 목록 조회 결과
+     */
+    @Override
+    public Slice<StorybookSearchPageResponse> getStorybooks(User user, SearchCond searchCond, Integer page) {
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, CREATE_AT));
+        return storybookQueryRepository.searchStorybooks(user, searchCond, pageable);
+    }
 
     /**
      * 동화 생성

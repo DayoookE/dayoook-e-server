@@ -37,7 +37,7 @@ public class Song extends BaseEntity {
     @Column(nullable = false)
     private String lyrics; // 가사
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_id")
     private Country country; // 국가
 }

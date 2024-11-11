@@ -1,17 +1,19 @@
 package inha.dayoook_e.storybook.api.controller;
 
 import inha.dayoook_e.common.BaseResponse;
-import inha.dayoook_e.song.api.controller.dto.response.LikedTuteeSongProgressResponse;
-import inha.dayoook_e.song.api.controller.dto.response.SongResponse;
+import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.storybook.api.controller.dto.request.CreateStorybookRequest;
+import inha.dayoook_e.storybook.api.controller.dto.request.SearchCond;
 import inha.dayoook_e.storybook.api.controller.dto.response.LikedTuteeStorybookProgressResponse;
 import inha.dayoook_e.storybook.api.controller.dto.response.StorybookResponse;
+import inha.dayoook_e.storybook.api.controller.dto.response.StorybookSearchPageResponse;
 import inha.dayoook_e.storybook.api.service.StorybookService;
 import inha.dayoook_e.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import static inha.dayoook_e.common.code.status.ErrorStatus.INVALID_PAGE;
 import static inha.dayoook_e.common.code.status.SuccessStatus.*;
 
 
@@ -35,6 +38,28 @@ import static inha.dayoook_e.common.code.status.SuccessStatus.*;
 public class StorybookController {
 
     private final StorybookService storybookService;
+
+    /**
+     * 동화 조회 API
+     *
+     * <p>동화를 조회합니다.</p>
+     *
+     * @param searchCond 검색 조건
+     * @param page 페이지 번호
+     * @return 동화 조회 결과를 포함하는 BaseResponse<Slice<StorybookSearchPageResponse>>
+     */
+    @GetMapping
+    @Operation(summary = "동화 조회 API", description = "동화를 조회합니다.")
+    public BaseResponse<Slice<StorybookSearchPageResponse>> getStorybooks(
+            @AuthenticationPrincipal User user,
+            @Validated @ModelAttribute SearchCond searchCond,
+            @RequestParam("page") Integer page
+    ) {
+        if (page < 1) {
+            throw new BaseException(INVALID_PAGE);
+        }
+        return BaseResponse.of(STORYBOOK_SEARCH_PAGE_OK, storybookService.getStorybooks(user, searchCond, page - 1));
+    }
 
     /**
      * 동화 생성 API

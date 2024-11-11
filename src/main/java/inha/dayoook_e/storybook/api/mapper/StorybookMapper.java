@@ -4,6 +4,7 @@ import inha.dayoook_e.mapping.domain.Country;
 import inha.dayoook_e.storybook.api.controller.dto.request.CreateStorybookRequest;
 import inha.dayoook_e.storybook.api.controller.dto.response.LikedTuteeStorybookProgressResponse;
 import inha.dayoook_e.storybook.api.controller.dto.response.StorybookResponse;
+import inha.dayoook_e.storybook.api.controller.dto.response.StorybookSearchPageResponse;
 import inha.dayoook_e.storybook.domain.Storybook;
 import inha.dayoook_e.storybook.domain.StorybookPage;
 import inha.dayoook_e.storybook.domain.TuteeStoryProgress;
@@ -70,4 +71,15 @@ public interface StorybookMapper {
      */
     @Mapping(target = "id", source = "tuteeStoryProgress.id.storybookId")
     LikedTuteeStorybookProgressResponse tuteeStoryProgressToLikedTuteeStorybookProgressResponse(TuteeStoryProgress tuteeStoryProgress);
+
+    /**
+     * Storybook을 StorybookSearchPageResponse로 변환.
+     *
+     * @param storybook Storybook
+     * @param liked     좋아요 누른 여부
+     * @param lastPageNumber 마지막 페이지 번호
+     * @param isCompleted 완료 여부
+     * @return StorybookSearchPageResponse
+     */
+    StorybookSearchPageResponse storybookToStorybookSearchPageResponse(Storybook storybook, boolean liked, int lastPageNumber, boolean isCompleted);
 }
