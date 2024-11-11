@@ -43,4 +43,8 @@ public class TuteeStoryProgress {
     public void toggleLike() {
         this.liked = !this.liked;
     }
+
+    public void completeStory() {
+        this.isCompleted = true;
+    }
 }

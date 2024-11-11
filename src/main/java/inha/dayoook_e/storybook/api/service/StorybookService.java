@@ -12,4 +12,5 @@ public interface StorybookService {
     StorybookResponse createStorybook(User user, CreateStorybookRequest createStorybookRequest, MultipartFile thumbnail, List<MultipartFile> pageImages);
 
     LikedTuteeStorybookProgressResponse toggleLike(User user, Integer storybookId);
+    StorybookResponse completeStorybook(User user, Integer storybookId);
 }

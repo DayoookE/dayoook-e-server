@@ -2,6 +2,7 @@ package inha.dayoook_e.storybook.api.controller;
 
 import inha.dayoook_e.common.BaseResponse;
 import inha.dayoook_e.song.api.controller.dto.response.LikedTuteeSongProgressResponse;
+import inha.dayoook_e.song.api.controller.dto.response.SongResponse;
 import inha.dayoook_e.storybook.api.controller.dto.request.CreateStorybookRequest;
 import inha.dayoook_e.storybook.api.controller.dto.response.LikedTuteeStorybookProgressResponse;
 import inha.dayoook_e.storybook.api.controller.dto.response.StorybookResponse;
@@ -71,5 +72,21 @@ public class StorybookController {
     public BaseResponse<LikedTuteeStorybookProgressResponse> toggleLike(@AuthenticationPrincipal User user,
                                                                         @PathVariable("storybookId") Integer storybookId) {
         return BaseResponse.of(STORYBOOK_TOGGLE_LIKE_OK, storybookService.toggleLike(user, storybookId));
+    }
+
+    /**
+     * 동화 완료 API
+     *
+     * <p>동화 듣는 것을 완료합니다.</p>
+     *
+     * @param user 로그인한 사용자
+     * @param storybookId 동화 id
+     * @return 동화 완료 결과를 포함하는 BaseResponse<StorybookResponse>
+     */
+    @PostMapping("/{storybookId}/complete")
+    @Operation(summary = "동화 완료 API", description = "동화 듣는 것을 완료합니다.")
+    public BaseResponse<StorybookResponse> completeStorybook(@AuthenticationPrincipal User user,
+                                                             @PathVariable("storybookId") Integer storybookId) {
+        return BaseResponse.of(STORYBOOK_COMPLETE_OK, storybookService.completeStorybook(user, storybookId));
     }
 }

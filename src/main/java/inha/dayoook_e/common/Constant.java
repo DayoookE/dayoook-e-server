@@ -19,8 +19,8 @@ public class Constant {
     //동요 완료 보상
     public final static int COMPLETE_REWARD = 20;
 
-    //동요 완료 보상
     public final static String SONG_COMPLETE = "_동요 완료 보상";
+    public final static String STORYBOOK_COMPLETE = "_동화 완료 보상";
 
 
 
