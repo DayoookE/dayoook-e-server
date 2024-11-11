@@ -33,5 +33,9 @@ public class StorybookPage {
     @JoinColumn(name = "storybook_id")
     private Storybook storybook; // 동화
 
+    public void setStorybook(Storybook storybook) {
+        this.storybook = storybook;
+    }
+
 
 }

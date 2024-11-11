@@ -1,11 +1,27 @@
 package inha.dayoook_e.storybook.api.controller;
 
+import inha.dayoook_e.common.BaseResponse;
+import inha.dayoook_e.storybook.api.controller.dto.request.CreateStorybookRequest;
+import inha.dayoook_e.storybook.api.controller.dto.response.StorybookResponse;
 import inha.dayoook_e.storybook.api.service.StorybookService;
+import inha.dayoook_e.user.domain.User;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+
+import static inha.dayoook_e.common.code.status.SuccessStatus.STORYBOOK_CREATE_OK;
 
 
 /**
@@ -20,5 +36,24 @@ public class StorybookController {
 
     private final StorybookService storybookService;
 
-
+    /**
+     * 동화 생성 API
+     *
+     * <p>동화를 생성합니다.</p>
+     *
+     * @param user 로그인한 사용자
+     * @param createStorybookRequest 동화 생성 요청
+     * @param thumbnail 썸네일 이미지
+     * @param pageImages 페이지 이미지 리스트
+     * @return 동화 생성 결과를 포함하는 BaseResponse<StorybookResponse>
+     */
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "동화 생성(admin 전용) API", description = "동화를 생성합니다.")
+    public BaseResponse<StorybookResponse> createStorybook(@AuthenticationPrincipal User user,
+                                                           @Validated @RequestPart("storybook") CreateStorybookRequest createStorybookRequest,
+                                                           @RequestPart("thumbnail") MultipartFile thumbnail,
+                                                           @RequestPart("pages") List<MultipartFile> pageImages) {
+        return BaseResponse.of(STORYBOOK_CREATE_OK, storybookService.createStorybook(user, createStorybookRequest, thumbnail, pageImages));
+    }
 }
