@@ -9,6 +9,7 @@ import inha.dayoook_e.storybook.api.controller.dto.request.CreateStorybookReques
 import inha.dayoook_e.storybook.api.controller.dto.response.LikedTuteeStorybookProgressResponse;
 import inha.dayoook_e.storybook.api.controller.dto.response.StorybookResponse;
 import inha.dayoook_e.storybook.api.controller.dto.response.StorybookSearchPageResponse;
+import inha.dayoook_e.storybook.api.controller.dto.response.StorybookSearchResponse;
 import inha.dayoook_e.storybook.api.mapper.StorybookMapper;
 import inha.dayoook_e.storybook.domain.Storybook;
 import inha.dayoook_e.storybook.domain.StorybookPage;
@@ -76,6 +77,36 @@ public class StorybookServiceImpl implements StorybookService {
     public Slice<StorybookSearchPageResponse> getStorybooks(User user, SearchCond searchCond, Integer page) {
         Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, CREATE_AT));
         return storybookQueryRepository.searchStorybooks(user, searchCond, pageable);
+    }
+
+    /**
+     * 동화 상세 조회
+     *
+     * @param user 로그인한 사용자
+     * @param storybookId 동화 ID
+     * @param pageNumber 페이지 번호
+     * @return 동화 상세 조회 결과
+     */
+    @Override
+    public StorybookSearchResponse getStorybook(User user, Integer storybookId, Integer pageNumber) {
+        // 1. 동화 조회
+        Storybook storybook = storybookJpaRepository.findByIdAndState(storybookId, ACTIVE)
+                .orElseThrow(() -> new BaseException(STORYBOOK_NOT_FOUND));
+
+        // 2. 페이지 번호에 해당하는 페이지 조회
+        StorybookPage page = storybookPageJpaRepository.findByStorybook_IdAndPageNumber(storybookId, pageNumber)
+                .orElseThrow(() -> new BaseException(STORYBOOK_PAGE_NOT_FOUND));
+
+        // 3. 사용자의 동화 진행상황 조회
+        TuteeStoryProgress progress = tuteeStoryProgressJpaRepository
+                .findByTutee_IdAndStorybook_Id(user.getId(), storybookId)
+                .orElse(null);
+
+        boolean liked = progress != null && progress.getLiked();
+        int lastPageNumber = progress != null ? progress.getLastPageNumber() : 1;
+        boolean isCompleted = progress != null && progress.getIsCompleted();
+
+        return storybookMapper.storybookToStorybookSearchResponse(storybook, page, liked, lastPageNumber, isCompleted);
     }
 
     /**

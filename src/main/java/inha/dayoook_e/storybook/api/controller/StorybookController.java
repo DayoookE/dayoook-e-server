@@ -7,6 +7,7 @@ import inha.dayoook_e.storybook.api.controller.dto.request.SearchCond;
 import inha.dayoook_e.storybook.api.controller.dto.response.LikedTuteeStorybookProgressResponse;
 import inha.dayoook_e.storybook.api.controller.dto.response.StorybookResponse;
 import inha.dayoook_e.storybook.api.controller.dto.response.StorybookSearchPageResponse;
+import inha.dayoook_e.storybook.api.controller.dto.response.StorybookSearchResponse;
 import inha.dayoook_e.storybook.api.service.StorybookService;
 import inha.dayoook_e.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,7 +50,7 @@ public class StorybookController {
      * @return 동화 조회 결과를 포함하는 BaseResponse<Slice<StorybookSearchPageResponse>>
      */
     @GetMapping
-    @Operation(summary = "동화 조회 API", description = "동화를 조회합니다.")
+    @Operation(summary = "동화 조건 조회 API", description = "동화를 조건 조회합니다.")
     public BaseResponse<Slice<StorybookSearchPageResponse>> getStorybooks(
             @AuthenticationPrincipal User user,
             @Validated @ModelAttribute SearchCond searchCond,
@@ -59,6 +60,24 @@ public class StorybookController {
             throw new BaseException(INVALID_PAGE);
         }
         return BaseResponse.of(STORYBOOK_SEARCH_PAGE_OK, storybookService.getStorybooks(user, searchCond, page - 1));
+    }
+
+    /**
+     * 동화 상세 조회 API
+     *
+     * <p>동화를 상세 조회합니다.</p>
+     *
+     * @param user 로그인한 사용자
+     * @param pageNumber 페이지 번호
+     * @param storybookId 동화 id
+     * @return 동화 상세 조회 결과를 포함하는 BaseResponse<StorybookSearchResponse>
+     */
+    @GetMapping("/{storybookId}")
+    @Operation(summary = "동화 상세 조회 API", description = "동화를 상세 조회합니다.")
+    public BaseResponse<StorybookSearchResponse> getStorybook(@AuthenticationPrincipal User user,
+                                                              @RequestParam("pageNumber") Integer pageNumber,
+                                                              @PathVariable("storybookId") Integer storybookId) {
+        return BaseResponse.of(STORYBOOK_SEARCH_OK, storybookService.getStorybook(user, storybookId, pageNumber));
     }
 
     /**
