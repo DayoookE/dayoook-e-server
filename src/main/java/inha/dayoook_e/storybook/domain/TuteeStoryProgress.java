@@ -21,7 +21,7 @@ public class TuteeStoryProgress {
     private TuteeStoryProgressId id;
 
 
-    @Column(name = "page_number", nullable = false)
+    @Column(name = "liked", nullable = false)
     private Boolean liked; // 좋아요 여부
 
     @Column(name = "last_page_number", nullable = false)
@@ -40,4 +40,15 @@ public class TuteeStoryProgress {
     @JoinColumn(name = "storybook_id", nullable = false)
     private Storybook storybook;
 
+    public void toggleLike() {
+        this.liked = !this.liked;
+    }
+
+    public void completeStory() {
+        this.isCompleted = true;
+    }
+
+    public void updateLastReadPage(Integer pageNumber) {
+        this.lastPageNumber = pageNumber;
+    }
 }

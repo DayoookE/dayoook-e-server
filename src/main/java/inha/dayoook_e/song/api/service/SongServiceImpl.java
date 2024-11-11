@@ -169,7 +169,7 @@ public class SongServiceImpl implements SongService {
     @Override
     public SongResponse completeSong(User user, Integer songId) {
         // 1. 노래 조회
-        Song song = songJpaRepository.findById(songId)
+        Song song = songJpaRepository.findByIdAndState(songId, ACTIVE)
                 .orElseThrow(() -> new BaseException(SONG_NOT_FOUND));
 
         // 2. 사용자의 노래 진행상황 조회 또는 생성
@@ -186,10 +186,10 @@ public class SongServiceImpl implements SongService {
         progress.completeSong();
         TuteeInfo tuteeInfo = tuteeInfoJpaRepository.findByuserId(user.getId())
                 .orElseThrow(() -> new BaseException(NOT_FIND_USER));
-        tuteeInfo.addPoint(20);
+        tuteeInfo.addPoint(COMPLETE_REWARD);
         User findUser = userJpaRepository.findByIdAndState(user.getId(), ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_FIND_USER));
-        Point point = mappingMapper.createPoint(findUser, 20, songId + SONG_COMPLETE, LocalDateTime.now());
+        Point point = mappingMapper.createPoint(findUser, COMPLETE_REWARD, songId + SONG_COMPLETE, LocalDateTime.now());
         pointJpaRepository.save(point);
         tuteeSongProgressJpaRepository.save(progress);
         return songMapper.songToSongResponse(song);
