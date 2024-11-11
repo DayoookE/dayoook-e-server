@@ -1,7 +1,9 @@
 package inha.dayoook_e.storybook.api.controller;
 
 import inha.dayoook_e.common.BaseResponse;
+import inha.dayoook_e.song.api.controller.dto.response.LikedTuteeSongProgressResponse;
 import inha.dayoook_e.storybook.api.controller.dto.request.CreateStorybookRequest;
+import inha.dayoook_e.storybook.api.controller.dto.response.LikedTuteeStorybookProgressResponse;
 import inha.dayoook_e.storybook.api.controller.dto.response.StorybookResponse;
 import inha.dayoook_e.storybook.api.service.StorybookService;
 import inha.dayoook_e.user.domain.User;
@@ -13,15 +15,12 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-import static inha.dayoook_e.common.code.status.SuccessStatus.STORYBOOK_CREATE_OK;
+import static inha.dayoook_e.common.code.status.SuccessStatus.*;
 
 
 /**
@@ -55,5 +54,22 @@ public class StorybookController {
                                                            @RequestPart("thumbnail") MultipartFile thumbnail,
                                                            @RequestPart("pages") List<MultipartFile> pageImages) {
         return BaseResponse.of(STORYBOOK_CREATE_OK, storybookService.createStorybook(user, createStorybookRequest, thumbnail, pageImages));
+    }
+
+
+    /**
+     * 동화 좋아요 토글 API
+     *
+     * <p>좋아요를 토글합니다.</p>
+     *
+     * @param user 로그인한 사용자
+     * @param storybookId 동화 id
+     * @return 좋아요 토글 결과를 포함하는 BaseResponse<LikedTuteeStorybookProgressResponse>
+     */
+    @PostMapping("/{storybookId}/toggle-like")
+    @Operation(summary = "좋아요 토글 API", description = "좋아요를 토글합니다.")
+    public BaseResponse<LikedTuteeStorybookProgressResponse> toggleLike(@AuthenticationPrincipal User user,
+                                                                        @PathVariable("storybookId") Integer storybookId) {
+        return BaseResponse.of(STORYBOOK_TOGGLE_LIKE_OK, storybookService.toggleLike(user, storybookId));
     }
 }
