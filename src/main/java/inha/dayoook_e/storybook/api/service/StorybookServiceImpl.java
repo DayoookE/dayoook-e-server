@@ -103,7 +103,7 @@ public class StorybookServiceImpl implements StorybookService {
         String thumbnailUrl = s3Provider.multipartFileUpload(thumbnail, new S3UploadRequest(user.getId(), STORYBOOK_THUMBNAIL_DIR));
 
         // 4. Storybook 엔티티 생성 및 저장
-        Storybook storybook = storybookMapper.createStorybookRequestToStorybook(createStorybookRequest, country, thumbnailUrl);
+        Storybook storybook = storybookMapper.createStorybookRequestToStorybook(createStorybookRequest, country, thumbnailUrl, pageImages.size());
 
         // 5. 페이지 이미지 업로드 및 StorybookPage 엔티티 생성
         for (int i = 0; i < pageImages.size(); i++) {

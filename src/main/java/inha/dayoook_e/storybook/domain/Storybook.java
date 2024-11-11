@@ -38,6 +38,9 @@ public class Storybook extends BaseEntity {
     @JoinColumn(name = "country_id")
     private Country country; // 국가
 
+    @Column(name = "page_count", nullable = false)
+    private Integer pageCount; // 페이지 수
+
     @Builder.Default
     @OneToMany(mappedBy = "storybook", fetch = FetchType.LAZY)
     private List<StorybookPage> pages = new ArrayList<>();

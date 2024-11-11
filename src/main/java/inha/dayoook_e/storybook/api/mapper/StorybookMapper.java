@@ -30,7 +30,7 @@ public interface StorybookMapper {
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "pages", ignore = true)
-    Storybook createStorybookRequestToStorybook(CreateStorybookRequest request, Country country, String thumbnailUrl);
+    Storybook createStorybookRequestToStorybook(CreateStorybookRequest request, Country country, String thumbnailUrl, Integer pageCount);
     /**
      * CreateStorybookRequest.PageContent를 StorybookPage로 변환.
      *
