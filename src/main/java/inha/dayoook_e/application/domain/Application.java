@@ -10,6 +10,9 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * Application은 신청 정보 엔티티
+ */
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
