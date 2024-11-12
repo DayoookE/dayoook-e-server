@@ -28,7 +28,15 @@ public interface TutorScheduleMapper {
      * @return TutorSchedule 엔티티
      */
     @Mapping(target = "id", source = "scheduleId")
-    TutorSchedule toTutorSchedule(User tutor, Day day, TimeSlot timeSlot, TutorScheduleId scheduleId,
-                                  Boolean isAvailable);
+    default TutorSchedule toTutorSchedule(User tutor, Day day, TimeSlot timeSlot, TutorScheduleId scheduleId,
+                                  Boolean isAvailable) {
+        return TutorSchedule.builder()
+                .id(scheduleId)
+                .user(tutor)
+                .day(day)
+                .timeSlot(timeSlot)
+                .isAvailable(isAvailable)
+                .build();
+    }
 
 }
