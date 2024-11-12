@@ -4,6 +4,7 @@ import inha.dayoook_e.application.api.controller.dto.request.ApplyRequest;
 import inha.dayoook_e.application.api.controller.dto.response.ApplicationResponse;
 import inha.dayoook_e.application.api.mapper.ApplicationMapper;
 import inha.dayoook_e.application.domain.enums.Status;
+import inha.dayoook_e.common.BaseEntity;
 import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.application.domain.Application;
 import inha.dayoook_e.mapping.domain.Day;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.common.code.status.ErrorStatus.*;
 
 /**
@@ -54,7 +56,8 @@ public class ApplicationServiceImpl implements ApplicationService{
      */
     public ApplicationResponse apply(User tutee, ApplyRequest applyRequest) {
         // 1. 튜터 조회
-        User tutor = userJpaRepository.findById(applyRequest.tutorId()).orElseThrow(() -> new BaseException(NOT_FIND_USER));
+        User tutor = userJpaRepository.findByIdAndState(applyRequest.tutorId(), ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_FIND_USER));
 
         // 2. 튜터 권한 조회
         if (!tutor.getRole().equals(Role.TUTOR))
@@ -89,7 +92,5 @@ public class ApplicationServiceImpl implements ApplicationService{
         else {
             throw new BaseException(SCHEDULE_ALREADY_BOOKED);
         }
-
     }
-
 }
