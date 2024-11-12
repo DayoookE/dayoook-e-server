@@ -5,6 +5,7 @@ import inha.dayoook_e.mapping.domain.Day;
 import inha.dayoook_e.mapping.domain.TimeSlot;
 import inha.dayoook_e.tutor.domain.id.TutorAgeGroupId;
 import inha.dayoook_e.tutor.domain.id.TutorScheduleId;
+import inha.dayoook_e.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,7 +27,7 @@ public class TutorSchedule {
     @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private TutorInfo tutorInfo;
+    private User user;
 
     @MapsId("dayId")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,4 +41,8 @@ public class TutorSchedule {
 
     @Column(name = "is_available", nullable = false)
     private Boolean isAvailable; // 튜터가 해당 시간에 수업 가능한지 여부
+
+    public void makeUnavailable() {
+        this.isAvailable = false;
+    }
 }

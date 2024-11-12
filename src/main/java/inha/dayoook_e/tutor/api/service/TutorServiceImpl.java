@@ -1,5 +1,6 @@
 package inha.dayoook_e.tutor.api.service;
 
+import inha.dayoook_e.application.domain.repository.ApplicationJpaRepository;
 import inha.dayoook_e.tutor.api.mapper.TutorMapper;
 import inha.dayoook_e.tutor.domain.repository.*;
 import inha.dayoook_e.user.domain.repository.UserJpaRepository;
@@ -21,7 +22,7 @@ public class TutorServiceImpl implements TutorService {
     private final TutorInfoJpaRepository tutorInfoJpaRepository;
     private final ExperienceJpaRepository experienceJpaRepository;
     private final TutorAgeGroupJpaRepository tutorAgeGroupJpaRepository;
-    private final TutorApplicationJpaRepository tutorApplicationJpaRepository;
+    private final ApplicationJpaRepository applicationJpaRepository;
     private final TutorScheduleJpaRepository tutorScheduleJpaRepository;
     private final UserJpaRepository userJpaRepository;
     private final TutorMapper tutorMapper;

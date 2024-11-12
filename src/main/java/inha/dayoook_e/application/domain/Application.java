@@ -1,26 +1,29 @@
-package inha.dayoook_e.tutor.domain;
+package inha.dayoook_e.application.domain;
 
 
 import inha.dayoook_e.mapping.domain.Day;
 import inha.dayoook_e.mapping.domain.TimeSlot;
-import inha.dayoook_e.tutor.domain.enums.Status;
+import inha.dayoook_e.application.domain.enums.Status;
 import inha.dayoook_e.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * Application은 신청 정보 엔티티
+ */
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Getter
 @Builder
 @Entity
-@Table(name = "tutor_application_tb")
-public class TutorApplication {
+@Table(name = "application_tb")
+public class Application {
 
     @Id
-    @Column(name = "tutor_application_id", nullable = false, updatable = false)
+    @Column(name = "application_id", nullable = false, updatable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
