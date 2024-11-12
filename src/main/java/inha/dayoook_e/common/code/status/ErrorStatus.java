@@ -38,12 +38,18 @@ public enum ErrorStatus implements BaseErrorCode {
 
     SCHEDULE_ALREADY_BOOKED(HttpStatus.BAD_REQUEST, "SCHEDULE4000", "이미 예약된 스케줄입니다."),
 
+    STORYBOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "STORYBOOK4000", "동화를 찾을 수 없습니다."),
+    STORYBOOK_ALREADY_COMPLETE(HttpStatus.BAD_REQUEST, "STORYBOOK4001", "이미 완료한 동화입니다."),
+    STORYBOOK_PAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORYBOOK4002", "동화 페이지를 찾을 수 없습니다."),
+
+
     EMPTY_JWT(HttpStatus.UNAUTHORIZED, "JWT4000", "JWT를 입력해주세요"),
     INVALID_JWT(HttpStatus.UNAUTHORIZED, "JWT4001", "유효하지 않은 JWT입니다."),
     INVALID_USER_JWT(HttpStatus.FORBIDDEN, "JWT4002", "권한이 없는 유저의 접근입니다."),
     MISSING_AUTH_HEADER(HttpStatus.UNAUTHORIZED, "JWT4003","인증 헤더가 없습니다."),
 
     INVALID_PAGE(HttpStatus.BAD_REQUEST, "PAGE4000", "유효하지 않은 페이지입니다."),
+    PAGE_COUNT_MISMATCH(HttpStatus.BAD_REQUEST, "PAGE4001", "페이지 수가 일치하지 않습니다."),
 
     //토큰 만료
     INVALID_JWT_EXPIRED(HttpStatus.UNAUTHORIZED, "JWT4004", "만료된 JWT입니다."),

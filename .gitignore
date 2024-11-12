@@ -39,3 +39,7 @@ out/
 src/main/generated/
 
 /src/main/java/inha/dayoook_e/InitData.java
+
+application-local.yml
+application-dev.yml
+application-prod.yml

@@ -23,6 +23,9 @@ import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.song.domain.QSong.song;
 import static inha.dayoook_e.song.domain.QTuteeSongProgress.tuteeSongProgress;
 
+/**
+ * SongQueryRepository는 노래 조회를 위한 쿼리 메서드를 제공.
+ */
 @Repository
 @RequiredArgsConstructor
 public class SongQueryRepository {

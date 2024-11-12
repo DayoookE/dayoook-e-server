@@ -1,5 +1,6 @@
 package inha.dayoook_e.storybook.domain;
 
+import inha.dayoook_e.common.BaseEntity;
 import inha.dayoook_e.mapping.domain.Country;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,7 +18,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "storybook_tb")
-public class Storybook {
+public class Storybook extends BaseEntity {
 
     @Id
     @Column(name = "storybook_id", nullable = false, updatable = false)
@@ -33,11 +34,19 @@ public class Storybook {
     @Column(name = "thumbnail_url", nullable = false, length = 100)
     private String thumbnailUrl; // 섬네일
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_id")
     private Country country; // 국가
 
+    @Column(name = "page_count", nullable = false)
+    private Integer pageCount; // 페이지 수
+
+    @Builder.Default
     @OneToMany(mappedBy = "storybook", fetch = FetchType.LAZY)
     private List<StorybookPage> pages = new ArrayList<>();
 
+    public void addPage(StorybookPage page) {
+        this.pages.add(page);
+        page.setStorybook(this);
+    }
 }
