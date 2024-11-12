@@ -82,7 +82,6 @@ public class ApplicationServiceImpl implements ApplicationService{
 
         // 6-1. 스케쥴이 available 하다면 신청 생성
         if (tutorSchedule.getIsAvailable()) {
-            tutorSchedule.makeUnavailable();
             Application application = applicationMapper.toApplication(tutee, tutor, day, timeSlot,
                     LocalDateTime.now(), Status.APPLYING, applyRequest.message());
             Application savedApplication = applicationJpaRepository.save(application);
