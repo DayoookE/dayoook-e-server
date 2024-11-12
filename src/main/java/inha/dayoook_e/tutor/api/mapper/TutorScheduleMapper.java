@@ -17,6 +17,16 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface TutorScheduleMapper {
 
+    /**
+     * TutorSchedule 생성
+     *
+     * @param tutor 튜터 정보
+     * @param day 요일 정보
+     * @param timeSlot 시간대 정보
+     * @param scheduleId 스케줄 정보 ID
+     * @param isAvailable 신청 가능한 스케줄인지 판단
+     * @return TutorSchedule 엔티티
+     */
     @Mapping(target = "id", source = "scheduleId")
     TutorSchedule toTutorSchedule(User tutor, Day day, TimeSlot timeSlot, TutorScheduleId scheduleId,
                                   Boolean isAvailable);
