@@ -1,9 +1,12 @@
 package inha.dayoook_e.lesson.domain;
 
+import inha.dayoook_e.course.domain.Course;
 import inha.dayoook_e.lesson.domain.enums.Status;
 import inha.dayoook_e.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 /**
  * LessonSchedule은 수업 일정을 나타내는 엔티티.
@@ -26,18 +29,18 @@ public class LessonSchedule {
     @Enumerated(EnumType.STRING)
     private Status status; // 수업 상태
 
-
     @Column(nullable = false)
     private Boolean attendance; //출석 여부
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tutor_id", nullable = false)
-    private User tutor;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tutee_id", nullable = false)
-    private User tutee;
+    @Column(name = "start_at", nullable = false)
+    private LocalDateTime startAt; // 수업 시작 시간
 
     @OneToOne(mappedBy = "lessonSchedule", fetch = FetchType.LAZY)
     private MeetingRoom meetingRoom;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "Course_id", nullable = false)
+    private Course course;
+
+
 }

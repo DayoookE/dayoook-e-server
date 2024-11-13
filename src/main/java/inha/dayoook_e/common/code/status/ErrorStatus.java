@@ -28,7 +28,7 @@ public enum ErrorStatus implements BaseErrorCode {
     INVALID_LANGUAGE_ID(HttpStatus.BAD_REQUEST, "LANGUAGE4000", "유효하지 않은 언어 ID입니다."),
     COUNTRY_NOT_FOUND(HttpStatus.NOT_FOUND, "COUNTRY4000", "국가를 찾을 수 없습니다."),
     NOT_FIND_DAY(HttpStatus.NOT_FOUND, "DAY4000", "요일을 찾을 수 없습니다."),
-    NOF_FIND_TIMESLOT(HttpStatus.NOT_FOUND, "TIMESLOT4000", "시간대를 찾을 수 없습니다."),
+    NOT_FIND_TIMESLOT(HttpStatus.NOT_FOUND, "TIMESLOT4000", "시간대를 찾을 수 없습니다."),
 
     INVALID_ROLE(HttpStatus.BAD_REQUEST, "ROLE4000", "잘못된 유저 권한입니다."),
 
@@ -36,7 +36,10 @@ public enum ErrorStatus implements BaseErrorCode {
     SONG_NOT_FOUND(HttpStatus.NOT_FOUND, "SONG4000", "동요를 찾을 수 없습니다."),
     SONG_ALREADY_COMPLETE(HttpStatus.BAD_REQUEST, "SONG4001", "이미 완료한 동요입니다."),
 
-    SCHEDULE_ALREADY_BOOKED(HttpStatus.BAD_REQUEST, "SCHEDULE4000", "이미 예약된 스케줄입니다."),
+    SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "SCHEDULE4000", "스케줄을 찾을 수 없습니다."),
+    SCHEDULE_ALREADY_BOOKED(HttpStatus.BAD_REQUEST, "SCHEDULE4001", "이미 예약된 스케줄입니다."),
+
+    APPLICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "APPLICATION4000", "신청 정보를 찾을 수 없습니다."),
 
     STORYBOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "STORYBOOK4000", "동화를 찾을 수 없습니다."),
     STORYBOOK_ALREADY_COMPLETE(HttpStatus.BAD_REQUEST, "STORYBOOK4001", "이미 완료한 동화입니다."),

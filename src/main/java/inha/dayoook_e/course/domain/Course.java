@@ -1,4 +1,4 @@
-package inha.dayoook_e.application.domain;
+package inha.dayoook_e.course.domain;
 
 
 import inha.dayoook_e.mapping.domain.Day;
@@ -11,7 +11,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 /**
- * Application은 신청 정보 엔티티
+ * Course는 강의 엔티티
  */
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -19,23 +19,16 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 @Entity
-@Table(name = "application_tb")
-public class Application {
+@Table(name = "course_tb")
+public class Course {
 
     @Id
-    @Column(name = "application_id", nullable = false, updatable = false)
+    @Column(name = "course_id", nullable = false, updatable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "application_at", nullable = false)
-    private LocalDateTime applicationAt; // 신청 날짜
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private Status status; // 신청 상태
-
-    @Column(nullable = false, length = 100)
-    private String message; // 튜터에게 전할 요청 사항
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt; // 강의 생성 날짜
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tutor_id", nullable = false)
@@ -52,9 +45,5 @@ public class Application {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "time_slot_id", nullable = false)
     private TimeSlot timeSlot;
-
-    public void changeStatus(Status status) {
-        this.status = status;
-    }
 
 }
