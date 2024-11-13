@@ -9,15 +9,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.*;
 
-import static inha.dayoook_e.common.code.status.SuccessStatus.APPLICATION_CREATE_OK;
-import static inha.dayoook_e.common.code.status.SuccessStatus.SONG_CREATE_OK;
+import static inha.dayoook_e.common.code.status.SuccessStatus.*;
 
 
 /**
@@ -44,4 +40,31 @@ public class ApplicationController {
                                                    @RequestBody ApplyRequest applyRequest) {
         return BaseResponse.of(APPLICATION_CREATE_OK, applicationService.apply(user, applyRequest));
     }
+
+    /**
+     * 강의 신청 승인 api
+     * @param user 로그인 한 튜터
+     * @param applicationId 승인할 신청 ID
+     * @return 강의 신청 승인 결과
+     */
+    @PostMapping("/{applicationId}/approve")
+    @Operation(summary = "강의 신청 승인 API", description = "튜터가 강의 신청을 승인합니다.")
+    public BaseResponse<ApplicationResponse> approveApplication(@AuthenticationPrincipal User user,
+                                              @PathVariable("applicationId") Integer applicationId) {
+        return BaseResponse.of(APPLICATION_APPROVE_OK, applicationService.approveApplication(user, applicationId));
+    }
+
+    /**
+     * 강의 신청 거절 api
+     * @param user 로그인 한 튜터
+     * @param applicationId 거절할 신청 ID
+     * @return 강의 신청 거절 결과
+     */
+    @PostMapping("/{applicationId}/deny")
+    @Operation(summary = "강의 신청 거절 API", description = "튜터가 강의 신청을 거절합니다.")
+    public BaseResponse<ApplicationResponse> rejectApplication(@AuthenticationPrincipal User user,
+                                                   @PathVariable("applicationId") Integer applicationId) {
+        return BaseResponse.of(APPLICATION_REJECT_OK, applicationService.rejectApplication(user, applicationId));
+    }
+
 }
