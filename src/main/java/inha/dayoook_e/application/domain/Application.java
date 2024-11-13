@@ -53,6 +53,8 @@ public class Application {
     @JoinColumn(name = "time_slot_id", nullable = false)
     private TimeSlot timeSlot;
 
-
+    public void changeStatus(Status status) {
+        this.status = status;
+    }
 
 }
