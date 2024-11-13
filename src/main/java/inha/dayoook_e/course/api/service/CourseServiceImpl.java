@@ -12,18 +12,23 @@ import inha.dayoook_e.mapping.domain.repository.DayJpaRepository;
 import inha.dayoook_e.mapping.domain.repository.TimeSlotJpaRepository;
 import inha.dayoook_e.user.domain.User;
 import inha.dayoook_e.user.domain.repository.UserJpaRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.common.code.status.ErrorStatus.*;
 
+/**
+ * CourseServiceImpl은 강의 관련 비즈니스 로직을 처리하는 서비스 클래스.
+ */
 @Service
-@Transactional
 @RequiredArgsConstructor
+@Slf4j
+@Transactional
 public class CourseServiceImpl implements CourseService{
 
     private final CourseMapper courseMapper;

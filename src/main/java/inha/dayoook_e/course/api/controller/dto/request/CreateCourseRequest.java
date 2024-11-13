@@ -2,9 +2,7 @@ package inha.dayoook_e.course.api.controller.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
 
-@Builder
 public record CreateCourseRequest(
         @NotNull
         @Schema(description = "튜터 id", example = "1")
