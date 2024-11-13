@@ -4,6 +4,7 @@ import inha.dayoook_e.common.BaseResponse;
 import inha.dayoook_e.user.api.controller.dto.request.TuteeSignupRequest;
 import inha.dayoook_e.user.api.controller.dto.request.TutorSignupRequest;
 import inha.dayoook_e.user.api.controller.dto.response.SignupResponse;
+import inha.dayoook_e.user.api.controller.dto.response.UserInfoResponse;
 import inha.dayoook_e.user.api.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,8 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import static inha.dayoook_e.common.code.status.SuccessStatus.TUTEE_SIGNUP_OK;
-import static inha.dayoook_e.common.code.status.SuccessStatus.TUTOR_SIGNUP_OK;
+import static inha.dayoook_e.common.code.status.SuccessStatus.*;
 
 
 /**
@@ -29,6 +29,20 @@ import static inha.dayoook_e.common.code.status.SuccessStatus.TUTOR_SIGNUP_OK;
 public class UserController {
 
     private final UserService userService;
+
+    /**
+     * fast api 검증용 유저 정보 조회 API
+     *
+     * <p>유저 정보를 조회.</p>
+     *
+     * @param email 이메일
+     * @return 유저 정보를 포함하는 BaseResponse<UserInfoResponse>
+     */
+    @GetMapping("/info")
+    @Operation(summary = "유저 정보 조회 API", description = "유저 정보를 조회합니다.")
+    public BaseResponse<UserInfoResponse> getUserInfo(@RequestParam("email") String email) {
+        return BaseResponse.of(USER_INFO_OK, userService.getUserInfo(email));
+    }
 
     /**
      * 튜티 회원가입 API

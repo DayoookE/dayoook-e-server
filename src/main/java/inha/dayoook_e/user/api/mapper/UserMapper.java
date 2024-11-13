@@ -5,6 +5,7 @@ import inha.dayoook_e.mapping.domain.Language;
 import inha.dayoook_e.user.api.controller.dto.request.TuteeSignupRequest;
 import inha.dayoook_e.user.api.controller.dto.request.TutorSignupRequest;
 import inha.dayoook_e.user.api.controller.dto.response.SignupResponse;
+import inha.dayoook_e.user.api.controller.dto.response.UserInfoResponse;
 import inha.dayoook_e.user.domain.User;
 import inha.dayoook_e.user.domain.UserLanguage;
 import inha.dayoook_e.user.domain.id.UserLanguageId;
@@ -78,4 +79,11 @@ public interface UserMapper {
     SignupResponse userToSignupResponse(User savedUser);
 
 
+    /**
+     * User를 UserInfoResponse로 변환
+     *
+     * @param user 유저 엔티티
+     * @return UserInfoResponse
+     */
+    UserInfoResponse userToUserInfoResponse(User user);
 }
