@@ -25,7 +25,11 @@ public enum SuccessStatus implements BaseCode {
     SONG_SEARCH_OK(HttpStatus.OK, "SONG2002", "동요 상세 조회 성공"),
     SONG_TOGGLE_LIKE_OK(HttpStatus.OK, "SONG2003", "동요 좋아요 토글 성공"),
     SONG_COMPLETE_OK(HttpStatus.OK, "SONG2004", "동요 완료 성공"),
+
     APPLICATION_CREATE_OK(HttpStatus.CREATED, "APPLICATION2000", "신청 생성 성공"),
+    APPLICATION_APPROVE_OK(HttpStatus.CREATED, "APPLICATION2001", "신청 승인 성공"),
+    APPLICATION_REJECT_OK(HttpStatus.CREATED, "APPLICATION2002", "신청 거절 성공"),
+
 
     STORYBOOK_CREATE_OK(HttpStatus.CREATED, "STORYBOOK2000", "동화 생성 성공"),
     STORYBOOK_TOGGLE_LIKE_OK(HttpStatus.OK, "STORYBOOK2001", "동화 좋아요 토글 성공"),
