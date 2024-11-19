@@ -1,5 +1,6 @@
 package inha.dayoook_e.user.api.service;
 
+import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.mapping.domain.Language;
 import inha.dayoook_e.mapping.domain.repository.LanguageJpaRepository;
 import inha.dayoook_e.song.domain.repository.SongJpaRepository;
@@ -14,6 +15,7 @@ import inha.dayoook_e.tutor.domain.repository.TutorInfoJpaRepository;
 import inha.dayoook_e.user.api.controller.dto.request.TuteeSignupRequest;
 import inha.dayoook_e.user.api.controller.dto.request.TutorSignupRequest;
 import inha.dayoook_e.user.api.controller.dto.response.SignupResponse;
+import inha.dayoook_e.user.api.controller.dto.response.UserInfoResponse;
 import inha.dayoook_e.user.api.mapper.UserMapper;
 import inha.dayoook_e.user.domain.User;
 import inha.dayoook_e.user.domain.UserLanguage;
@@ -30,7 +32,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.common.Constant.PROFILE_IMAGE_DIR;
+import static inha.dayoook_e.common.code.status.ErrorStatus.NOT_FIND_USER;
 
 /**
  * UserServiceImpl은 유저 관련 비즈니스 로직을 처리하는 서비스 클래스.
@@ -127,6 +131,19 @@ public class UserServiceImpl implements UserService {
         // 5. 튜터 경력 정보 저장
         experienceJpaRepository.saveAll(tutorMapper.toExperiences(savedUser, tutorSignupRequest.descriptionList()));
         return userMapper.userToSignupResponse(savedUser);
+    }
+
+    /**
+     * 유저 정보 조회
+     *
+     * @param email 이메일
+     * @return 유저 정보 응답
+     */
+    @Override
+    public UserInfoResponse getUserInfo(String email) {
+        User user = userJpaRepository.findByEmailAndState(email, ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_FIND_USER));
+        return userMapper.userToUserInfoResponse(user);
     }
 
 
