@@ -5,6 +5,7 @@ import inha.dayoook_e.common.BaseEntity;
 import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchAgeGroupResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
+import inha.dayoook_e.mapping.api.mapper.MappingMapper;
 import inha.dayoook_e.tutor.api.controller.dto.request.SearchCond;
 import inha.dayoook_e.tutor.api.controller.dto.response.SearchExperienceResponse;
 import inha.dayoook_e.tutor.api.controller.dto.response.TutorSearchPageResponse;
@@ -53,6 +54,7 @@ public class TutorServiceImpl implements TutorService {
     private final UserJpaRepository userJpaRepository;
     private final TutorMapper tutorMapper;
     private final UserMapper userMapper;
+    private final MappingMapper mappingMapper;
 
     /**
      * 튜터 목록 조건 조회
@@ -86,7 +88,7 @@ public class TutorServiceImpl implements TutorService {
 
         // 2-2. 조회 된 UserLanguageList를 SearchLanguageResponseList로 변환
         List<SearchLanguagesResponse> searchLanguagesResponses = languageList.stream().map(
-                userLanguage -> userMapper.userLanguageToSearchLanguageResponse(userLanguage)
+                userLanguage -> mappingMapper.userLanguageToSearchLanguageResponse(userLanguage)
         ).toList();
 
 
@@ -95,7 +97,7 @@ public class TutorServiceImpl implements TutorService {
 
         // 3-2. 조회된 TutorAgeGroupList를  SearchAgeGroupResponseList로 변환
         List<SearchAgeGroupResponse> searchAgeGroupResponses = ageGroupList.stream().map(
-                tutorAgeGroup -> tutorMapper.toSearchAgeGroupResponse(tutorAgeGroup)
+                tutorAgeGroup -> mappingMapper.toSearchAgeGroupResponse(tutorAgeGroup)
         ).toList();
 
 

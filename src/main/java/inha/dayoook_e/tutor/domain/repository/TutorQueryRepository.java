@@ -4,6 +4,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchAgeGroupResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
+import inha.dayoook_e.mapping.api.mapper.MappingMapper;
 import inha.dayoook_e.tutor.api.controller.dto.request.SearchCond;
 import inha.dayoook_e.tutor.api.controller.dto.response.TutorSearchPageResponse;
 import inha.dayoook_e.tutor.api.mapper.TutorMapper;
@@ -33,6 +34,7 @@ public class TutorQueryRepository {
     private final JPAQueryFactory queryFactory;
     private final TutorMapper tutorMapper;
     private final UserMapper userMapper;
+    private final MappingMapper mappingMapper;
 
     /**
      * 쿼리를 통한 튜터 검색
@@ -81,7 +83,7 @@ public class TutorQueryRepository {
 
         // 4-2. 언어 정보 리스트를 SearchLanguageResponse로 변환
         List<SearchLanguagesResponse> searchLanguagesResponses = userLanguageList.stream().map(
-                language -> userMapper.userLanguageToSearchLanguageResponse(language)
+                language -> mappingMapper.userLanguageToSearchLanguageResponse(language)
         ).toList();
 
         // 5-1. 연령대 정보 리스트 조회
@@ -94,7 +96,7 @@ public class TutorQueryRepository {
 
         // 5-2. 연령대 정보 리스트를 SearchAgeGroupResponseList로 변환
         List<SearchAgeGroupResponse> searchAgeGroupResponses = tutorAgeGroupList.stream().map(
-                ageGroup -> tutorMapper.toSearchAgeGroupResponse(ageGroup)
+                ageGroup -> mappingMapper.toSearchAgeGroupResponse(ageGroup)
         ).toList();
 
         // 6. 응답 DTO 변환
