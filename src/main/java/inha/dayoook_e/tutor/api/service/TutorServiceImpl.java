@@ -18,6 +18,7 @@ import inha.dayoook_e.tutor.domain.repository.*;
 import inha.dayoook_e.user.api.mapper.UserMapper;
 import inha.dayoook_e.user.domain.User;
 import inha.dayoook_e.user.domain.UserLanguage;
+import inha.dayoook_e.user.domain.enums.Role;
 import inha.dayoook_e.user.domain.repository.UserJpaRepository;
 import inha.dayoook_e.user.domain.repository.UserLanguageJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ import java.util.List;
 
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.common.Constant.NAME;
+import static inha.dayoook_e.common.code.status.ErrorStatus.INVALID_ROLE;
 import static inha.dayoook_e.common.code.status.ErrorStatus.NOT_FIND_USER;
 
 /**
@@ -80,6 +82,9 @@ public class TutorServiceImpl implements TutorService {
         User tutor = userJpaRepository.findByIdAndState(tutorId, ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_FIND_USER));
 
+        // 2. Role이 tutor인지 확인
+        if (tutor.getRole().equals(Role.TUTOR) == false)
+            throw new BaseException(INVALID_ROLE);
 
         // 2-1. 조회된 tutor의 Id로 UserLanguages 조회
         List<UserLanguage> languageList = userLanguageJpaRepository.findByUserId(tutorId);
