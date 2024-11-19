@@ -19,6 +19,10 @@ public record TutorSearchPageResponse(
         String name,
 
         @NotNull
+        @Schema(description = "튜터 평점", example = "4.5")
+        Double rating,
+
+        @NotNull
         List<SearchAgeGroupResponse> ageGroups,
 
         @NotNull

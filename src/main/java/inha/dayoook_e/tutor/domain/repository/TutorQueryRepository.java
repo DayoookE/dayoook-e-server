@@ -10,6 +10,7 @@ import inha.dayoook_e.tutor.api.controller.dto.request.SearchCond;
 import inha.dayoook_e.tutor.api.controller.dto.response.TutorSearchPageResponse;
 import inha.dayoook_e.tutor.api.mapper.TutorMapper;
 import inha.dayoook_e.tutor.domain.TutorAgeGroup;
+import inha.dayoook_e.tutor.domain.TutorInfo;
 import inha.dayoook_e.user.api.mapper.UserMapper;
 import inha.dayoook_e.user.domain.User;
 import inha.dayoook_e.user.domain.UserLanguage;
@@ -28,12 +29,10 @@ import java.util.stream.Collectors;
 
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.user.domain.QUser.user;
+import static inha.dayoook_e.tutor.domain.QTutorInfo.tutorInfo;
 import static inha.dayoook_e.tutor.domain.QTutorAgeGroup.tutorAgeGroup;
 import static inha.dayoook_e.user.domain.QUserLanguage.userLanguage;
 
-/**
- * TutorQueryRepository는 튜터 조회를 위한 쿼리 메서드를 제공.
- */
 @Repository
 @RequiredArgsConstructor
 public class TutorQueryRepository {
@@ -55,9 +54,10 @@ public class TutorQueryRepository {
                     .fetch();
         }
 
-        // 2. 기본 검색 조건으로 튜터 조회
+        // 2. 기본 검색 조건으로 튜터와 튜터 정보 조회
         List<User> tutors = queryFactory
                 .selectFrom(user)
+                .join(tutorInfo).on(user.id.eq(tutorInfo.userId))
                 .where(
                         user.state.eq(ACTIVE),
                         user.role.eq(Role.TUTOR),
@@ -89,13 +89,21 @@ public class TutorQueryRepository {
                 .map(User::getId)
                 .toList();
 
-        // 5. 언어 정보 리스트 조회
+        // 5. 튜터 정보(rating 포함) 조회
+        Map<Integer, TutorInfo> tutorInfoMap = queryFactory
+                .selectFrom(tutorInfo)
+                .where(tutorInfo.userId.in(tutorIds))
+                .fetch()
+                .stream()
+                .collect(Collectors.toMap(TutorInfo::getUserId, ti -> ti));
+
+        // 6. 언어 정보 리스트 조회
         List<UserLanguage> userLanguageList = queryFactory
                 .selectFrom(userLanguage)
                 .where(userLanguage.user.id.in(tutorIds))
                 .fetch();
 
-        // 6. 언어 정보 리스트를 SearchLanguageResponse로 변환
+        // 7. 언어 정보 리스트를 SearchLanguageResponse로 변환
         Map<Integer, List<SearchLanguagesResponse>> userLanguagesMap = userLanguageList.stream()
                 .collect(Collectors.groupingBy(
                         ul -> ul.getUser().getId(),
@@ -105,13 +113,13 @@ public class TutorQueryRepository {
                         )
                 ));
 
-        // 7. 연령대 정보 리스트 조회
+        // 8. 연령대 정보 리스트 조회
         List<TutorAgeGroup> tutorAgeGroupList = queryFactory
                 .selectFrom(tutorAgeGroup)
                 .where(tutorAgeGroup.tutorInfo.userId.in(tutorIds))
                 .fetch();
 
-        // 8. 연령대 정보 리스트를 SearchAgeGroupResponse로 변환
+        // 9. 연령대 정보 리스트를 SearchAgeGroupResponse로 변환
         Map<Integer, List<SearchAgeGroupResponse>> ageGroupMap = tutorAgeGroupList.stream()
                 .collect(Collectors.groupingBy(
                         tag -> tag.getTutorInfo().getUserId(),
@@ -121,13 +129,18 @@ public class TutorQueryRepository {
                         )
                 ));
 
-        // 9. 응답 DTO 변환
+        // 10. 응답 DTO 변환
         List<TutorSearchPageResponse> content = tutors.stream()
-                .map(tutor -> tutorMapper.toTutorSearchPageResponse(
-                        tutor,
-                        userLanguagesMap.getOrDefault(tutor.getId(), Collections.emptyList()),
-                        ageGroupMap.getOrDefault(tutor.getId(), Collections.emptyList())
-                ))
+                .map(tutor -> {
+                    TutorInfo info = tutorInfoMap.get(tutor.getId());
+                    return new TutorSearchPageResponse(
+                            tutor.getId(),
+                            tutor.getName(),
+                            info != null ? info.getRating() : 0.0,
+                            ageGroupMap.getOrDefault(tutor.getId(), Collections.emptyList()),
+                            userLanguagesMap.getOrDefault(tutor.getId(), Collections.emptyList())
+                    );
+                })
                 .toList();
 
         return new SliceImpl<>(content, pageable, hasNext);
