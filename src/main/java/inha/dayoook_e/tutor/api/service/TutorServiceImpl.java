@@ -68,4 +68,46 @@ public class TutorServiceImpl implements TutorService {
 
         return tutorQueryRepository.searchTutors(searchCond, pageable);
     }
+
+    /**
+     * 튜터 조회
+     * @param tutorId 조회 할 튜터 ID
+     * @return TutorSearchResponse
+     */
+    @Override
+    public TutorSearchResponse getTutor(Integer tutorId) {
+        // 1. tutorId로 튜터 조회
+        User tutor = userJpaRepository.findByIdAndState(tutorId, ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_FIND_USER));
+
+
+        // 2-1. 조회된 tutor의 Id로 UserLanguages 조회
+        List<UserLanguage> languageList = userLanguageJpaRepository.findByUserId(tutorId);
+
+        // 2-2. 조회 된 UserLanguageList를 SearchLanguageResponseList로 변환
+        List<SearchLanguagesResponse> searchLanguagesResponses = languageList.stream().map(
+                userLanguage -> userMapper.userLanguageToSearchLanguageResponse(userLanguage)
+        ).toList();
+
+
+        // 3-1. 조회된 tutor의 Id로 TutorAgeGroup 조회
+        List<TutorAgeGroup> ageGroupList = tutorAgeGroupJpaRepository.findByUserId(tutorId);
+
+        // 3-2. 조회된 TutorAgeGroupList를  SearchAgeGroupResponseList로 변환
+        List<SearchAgeGroupResponse> searchAgeGroupResponses = ageGroupList.stream().map(
+                tutorAgeGroup -> tutorMapper.toSearchAgeGroupResponse(tutorAgeGroup)
+        ).toList();
+
+
+        // 4-1. 조회된 tutor의 Id로 Experience 조회
+        List<Experience> experienceList = experienceJpaRepository.findByUserId(tutorId);
+
+        // 4-2. 조회된 ExperienceList 를 SearchExperienceResponseList로 변환
+        List<SearchExperienceResponse> searchExperienceResponses = experienceList.stream().map(
+                experience -> tutorMapper.toSearchExperienceResponse(experience)
+        ).toList();
+
+
+        return tutorMapper.toTutorSearchResponse(tutor, searchLanguagesResponses, searchAgeGroupResponses, searchExperienceResponses);
+    }
 }
