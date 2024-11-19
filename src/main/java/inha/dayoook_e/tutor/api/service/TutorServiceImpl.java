@@ -32,10 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
-import static inha.dayoook_e.common.Constant.CREATE_AT;
 import static inha.dayoook_e.common.Constant.NAME;
 import static inha.dayoook_e.common.code.status.ErrorStatus.NOT_FIND_USER;
-import static inha.dayoook_e.common.code.status.ErrorStatus.TUTORINFO_NOT_FOUND;
 
 /**
  * TutorServiceImpl은 튜터 관련 비즈니스 로직을 처리하는 서비스 클래스.
