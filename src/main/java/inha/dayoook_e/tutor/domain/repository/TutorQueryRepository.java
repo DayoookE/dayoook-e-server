@@ -12,6 +12,7 @@ import inha.dayoook_e.tutor.domain.TutorAgeGroup;
 import inha.dayoook_e.user.api.mapper.UserMapper;
 import inha.dayoook_e.user.domain.User;
 import inha.dayoook_e.user.domain.UserLanguage;
+import inha.dayoook_e.user.domain.enums.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -54,7 +55,8 @@ public class TutorQueryRepository {
                 .where(
                         languageIdEq(searchCond.languageId()),
                         ageGroupIdEq(searchCond.ageGroupId()),
-                        user.state.eq(ACTIVE)
+                        user.state.eq(ACTIVE),
+                        user.role.eq(Role.TUTOR)
                 )
                 .orderBy(user.name.asc())
                 .offset(pageable.getOffset())
