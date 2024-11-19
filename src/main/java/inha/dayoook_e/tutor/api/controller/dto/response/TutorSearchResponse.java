@@ -20,6 +20,18 @@ public record TutorSearchResponse(
     String name,
 
     @NotNull
+    @Schema(description = "튜터 직업", example = "교수")
+    String occupation,
+
+    @NotNull
+    @Schema(description = "튜터 소개", example = "안녕하세요")
+    String introduction,
+
+    @NotNull
+    @Schema(description = "튜터 평점", example = "4.5")
+    Double rating,
+
+    @NotNull
     List<SearchAgeGroupResponse> ageGroups,
 
     @NotNull
