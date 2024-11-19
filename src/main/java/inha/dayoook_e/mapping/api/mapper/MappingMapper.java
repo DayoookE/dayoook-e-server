@@ -1,8 +1,10 @@
 package inha.dayoook_e.mapping.api.mapper;
 
 import inha.dayoook_e.mapping.api.controller.dto.response.*;
+import inha.dayoook_e.tutor.domain.TutorAgeGroup;
 import inha.dayoook_e.user.domain.Point;
 import inha.dayoook_e.user.domain.User;
+import inha.dayoook_e.user.domain.UserLanguage;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
@@ -76,6 +78,23 @@ public interface MappingMapper {
     @Mapping(target = "user", source = "user")
     Point createPoint(User user, Integer point, String reason, LocalDateTime createdAt);
 
+    /**
+     * 연령대 조회 응답 Dto 생성
+     *
+     * @param tutorAgeGroup 튜터 연령대 정보
+     * @return 연령대 조회 응답 Dto
+     */
+    @Mapping(target = "id", source = "tutorAgeGroup.ageGroup.id")
+    @Mapping(target = "name", source = "tutorAgeGroup.ageGroup.name")
+    SearchAgeGroupResponse toSearchAgeGroupResponse(TutorAgeGroup tutorAgeGroup);
 
-
+    /**
+     * UserLanguage를 언어 검색 응답 Dto로 변환
+     *
+     * @param userLanguage 유저의 언어 정보
+     * @return 언어 검색 응답
+     */
+    @Mapping(source = "userLanguage.language.id", target = "id")
+    @Mapping(source = "userLanguage.language.name", target = "name")
+    SearchLanguagesResponse userLanguageToSearchLanguageResponse(UserLanguage userLanguage);
 }

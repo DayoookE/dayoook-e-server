@@ -78,7 +78,6 @@ public interface UserMapper {
      */
     SignupResponse userToSignupResponse(User savedUser);
 
-
     /**
      * User를 UserInfoResponse로 변환
      *

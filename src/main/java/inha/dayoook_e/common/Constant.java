@@ -15,6 +15,7 @@ public class Constant {
     public final static String SONG_MEDIA_DIR = "song/media";
 
     public final static String CREATE_AT = "createdAt";
+    public final static String NAME = "name";
 
     //동요 완료 보상
     public final static int COMPLETE_REWARD = 20;
