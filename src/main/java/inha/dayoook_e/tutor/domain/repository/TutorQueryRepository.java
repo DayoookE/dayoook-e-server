@@ -1,6 +1,7 @@
 package inha.dayoook_e.tutor.domain.repository;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchAgeGroupResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
@@ -18,8 +19,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.user.domain.QUser.user;
@@ -37,91 +42,98 @@ public class TutorQueryRepository {
     private final UserMapper userMapper;
     private final MappingMapper mappingMapper;
 
-    /**
-     * 쿼리를 통한 튜터 검색
-     *
-     * @param searchCond 검색 조건
-     * @param pageable 페이징 정보
-     * @return 튜터 검색 결과
-     */
     public Slice<TutorSearchPageResponse> searchTutors(SearchCond searchCond, Pageable pageable) {
-        // 1. 기본 검색 조건으로 데이터 조회
+        // 1. 언어 조건이 있는 경우, 해당 언어들을 모두 가지고 있는 튜터 ID 조회
+        List<Integer> tutorIdsWithAllLanguages = null;
+        if (searchCond.languageId() != null && !searchCond.languageId().isEmpty()) {
+            tutorIdsWithAllLanguages = queryFactory
+                    .select(userLanguage.user.id)
+                    .from(userLanguage)
+                    .where(userLanguage.language.id.in(searchCond.languageId()))
+                    .groupBy(userLanguage.user.id)
+                    .having(userLanguage.language.id.count().goe((long) searchCond.languageId().size()))
+                    .fetch();
+        }
+
+        // 2. 기본 검색 조건으로 튜터 조회
         List<User> tutors = queryFactory
                 .selectFrom(user)
-                .leftJoin(tutorAgeGroup)
-                .on(user.id.eq(tutorAgeGroup.tutorInfo.userId))
-                .leftJoin(userLanguage)
-                .on(user.id.eq(userLanguage.user.id))
                 .where(
-                        languageIdEq(searchCond.languageId()),
-                        ageGroupIdEq(searchCond.ageGroupId()),
                         user.state.eq(ACTIVE),
-                        user.role.eq(Role.TUTOR)
+                        user.role.eq(Role.TUTOR),
+                        nameContains(searchCond.name()),
+                        tutorIdsWithAllLanguages != null ?
+                                user.id.in(tutorIdsWithAllLanguages) : null,
+                        searchCond.ageGroupId() != null && !searchCond.ageGroupId().isEmpty() ?
+                                user.id.in(
+                                        JPAExpressions
+                                                .select(tutorAgeGroup.tutorInfo.userId)
+                                                .from(tutorAgeGroup)
+                                                .where(tutorAgeGroup.ageGroup.id.in(searchCond.ageGroupId()))
+                                ) : null
                 )
                 .orderBy(user.name.asc())
                 .offset(pageable.getOffset())
-                .limit(pageable.getPageSize() + 1) // Slice를 위해 limit + 1
+                .limit(pageable.getPageSize() + 1)
                 .fetch();
 
-        // 2. Slice 생성을 위한 hasNext 체크
+        // 3. Slice 생성을 위한 hasNext 체크
         boolean hasNext = false;
         if (tutors.size() > pageable.getPageSize()) {
             hasNext = true;
             tutors.remove(pageable.getPageSize());
         }
 
-        // 3. 튜터 ID 목록 추출
+        // 4. 튜터 ID 목록 추출
         List<Integer> tutorIds = tutors.stream()
                 .map(User::getId)
                 .toList();
 
-        // 4-1. 언어 정보 리스트 조회
+        // 5. 언어 정보 리스트 조회
         List<UserLanguage> userLanguageList = queryFactory
                 .selectFrom(userLanguage)
-                .where(
-                        userLanguage.user.id.in(tutorIds)
-                )
+                .where(userLanguage.user.id.in(tutorIds))
                 .fetch();
 
-        // 4-2. 언어 정보 리스트를 SearchLanguageResponse로 변환
-        List<SearchLanguagesResponse> searchLanguagesResponses = userLanguageList.stream().map(
-                language -> mappingMapper.userLanguageToSearchLanguageResponse(language)
-        ).toList();
+        // 6. 언어 정보 리스트를 SearchLanguageResponse로 변환
+        Map<Integer, List<SearchLanguagesResponse>> userLanguagesMap = userLanguageList.stream()
+                .collect(Collectors.groupingBy(
+                        ul -> ul.getUser().getId(),
+                        Collectors.mapping(
+                                mappingMapper::userLanguageToSearchLanguageResponse,
+                                Collectors.toList()
+                        )
+                ));
 
-        // 5-1. 연령대 정보 리스트 조회
+        // 7. 연령대 정보 리스트 조회
         List<TutorAgeGroup> tutorAgeGroupList = queryFactory
                 .selectFrom(tutorAgeGroup)
-                .where(
-                        tutorAgeGroup.tutorInfo.userId.in(tutorIds)
-                )
+                .where(tutorAgeGroup.tutorInfo.userId.in(tutorIds))
                 .fetch();
 
-        // 5-2. 연령대 정보 리스트를 SearchAgeGroupResponseList로 변환
-        List<SearchAgeGroupResponse> searchAgeGroupResponses = tutorAgeGroupList.stream().map(
-                ageGroup -> mappingMapper.toSearchAgeGroupResponse(ageGroup)
-        ).toList();
+        // 8. 연령대 정보 리스트를 SearchAgeGroupResponse로 변환
+        Map<Integer, List<SearchAgeGroupResponse>> ageGroupMap = tutorAgeGroupList.stream()
+                .collect(Collectors.groupingBy(
+                        tag -> tag.getTutorInfo().getUserId(),
+                        Collectors.mapping(
+                                mappingMapper::toSearchAgeGroupResponse,
+                                Collectors.toList()
+                        )
+                ));
 
-        // 6. 응답 DTO 변환
+        // 9. 응답 DTO 변환
         List<TutorSearchPageResponse> content = tutors.stream()
-                .map(tutor -> {
-                    return tutorMapper.toTutorSearchPageResponse(tutor, searchLanguagesResponses, searchAgeGroupResponses);
-                })
+                .map(tutor -> tutorMapper.toTutorSearchPageResponse(
+                        tutor,
+                        userLanguagesMap.getOrDefault(tutor.getId(), Collections.emptyList()),
+                        ageGroupMap.getOrDefault(tutor.getId(), Collections.emptyList())
+                ))
                 .toList();
 
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
-    /**
-     * 언어 ID 검색 조건
-     */
-    private BooleanExpression languageIdEq(Integer languageId) {
-        return languageId != null ? userLanguage.language.id.eq(languageId) : null;
-    }
-
-    /**
-     * 연령대 ID 검색 조건
-     */
-    private BooleanExpression ageGroupIdEq(Integer ageGroupId) {
-        return ageGroupId != null ? tutorAgeGroup.ageGroup.id.eq(ageGroupId) : null;
+    private BooleanExpression nameContains(String name) {
+        return StringUtils.hasText(name) ? user.name.contains(name) : null;
     }
 }
