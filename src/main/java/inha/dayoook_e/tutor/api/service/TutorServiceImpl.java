@@ -85,6 +85,7 @@ public class TutorServiceImpl implements TutorService {
         // 2. Role이 tutor인지 확인
         if (tutor.getRole().equals(Role.TUTOR) == false)
             throw new BaseException(INVALID_ROLE);
+        TutorInfo tutorInfo = tutor.getTutorInfo();
 
         // 2-1. 조회된 tutor의 Id로 UserLanguages 조회
         List<UserLanguage> languageList = userLanguageJpaRepository.findByUserId(tutorId);
@@ -113,6 +114,6 @@ public class TutorServiceImpl implements TutorService {
         ).toList();
 
 
-        return tutorMapper.toTutorSearchResponse(tutor, searchLanguagesResponses, searchAgeGroupResponses, searchExperienceResponses);
+        return tutorMapper.toTutorSearchResponse(tutor, tutorInfo, searchLanguagesResponses, searchAgeGroupResponses, searchExperienceResponses);
     }
 }
