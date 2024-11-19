@@ -1,5 +1,10 @@
 package inha.dayoook_e.tutor.api.mapper;
 
+import inha.dayoook_e.mapping.api.controller.dto.response.SearchAgeGroupResponse;
+import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
+import inha.dayoook_e.tutor.api.controller.dto.response.SearchExperienceResponse;
+import inha.dayoook_e.tutor.api.controller.dto.response.TutorSearchPageResponse;
+import inha.dayoook_e.tutor.api.controller.dto.response.TutorSearchResponse;
 import inha.dayoook_e.tutor.domain.Experience;
 import inha.dayoook_e.tutor.domain.TutorInfo;
 import inha.dayoook_e.user.api.controller.dto.request.TutorSignupRequest;
@@ -23,7 +28,6 @@ public interface TutorMapper {
      * @param tutorSignupRequest 튜터 회원가입 요청
      * @return TutorInfo
      */
-
     @Mapping(target = "rating", constant = "0.0")
     TutorInfo userToTutorInfo(User user, TutorSignupRequest tutorSignupRequest);
 
@@ -46,4 +50,40 @@ public interface TutorMapper {
                         .build())
                 .toList();
     }
+
+    /**
+     * 튜터 검색 페이지 응답 Dto 생성
+     *
+     * @param tutor 튜터 정보
+     * @param userLanguageList 튜터 언어 리스트
+     * @param tutorAgeGroupList 튜터 연령대 리스트
+     * @return 튜터 검색 페이지 응답
+     */
+    @Mapping(target = "languages", source = "userLanguageList")
+    @Mapping(target = "ageGroups", source = "tutorAgeGroupList" )
+    TutorSearchPageResponse toTutorSearchPageResponse(User tutor, List<SearchLanguagesResponse> userLanguageList, List<SearchAgeGroupResponse> tutorAgeGroupList);
+
+
+    /**
+     * 튜터 검색 응답 Dto 생성
+     *
+     * @param tutor 튜터 정보
+     * @param userLanguageList 튜터 언어 리스트
+     * @param ageGroupList 튜터 연령대 리스트
+     * @param experienceList 튜터 경력 리스트
+     * @return 튜터 검색 응답
+     */
+    @Mapping(target = "languages", source = "userLanguageList")
+    @Mapping(target = "ageGroups", source = "ageGroupList" )
+    @Mapping(target = "experiences", source = "experienceList")
+    TutorSearchResponse toTutorSearchResponse(User tutor, List<SearchLanguagesResponse> userLanguageList, List<SearchAgeGroupResponse> ageGroupList, List<SearchExperienceResponse> experienceList);
+
+    /**
+     * 경력 조회 응답 dto 생성
+     *
+     * @param experience 경력 정보
+     * @return 경력 조회 응답 dto
+     */
+    SearchExperienceResponse toSearchExperienceResponse(Experience experience);
+
 }

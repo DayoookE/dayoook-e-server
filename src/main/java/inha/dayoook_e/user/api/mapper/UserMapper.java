@@ -77,5 +77,4 @@ public interface UserMapper {
      */
     SignupResponse userToSignupResponse(User savedUser);
 
-
 }
