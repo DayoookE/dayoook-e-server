@@ -2,7 +2,9 @@ package inha.dayoook_e.tutor.api.service;
 
 import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchAgeGroupResponse;
+import inha.dayoook_e.mapping.api.controller.dto.response.SearchDayResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
+import inha.dayoook_e.mapping.api.controller.dto.response.SearchTimeSlotResponse;
 import inha.dayoook_e.mapping.api.mapper.MappingMapper;
 import inha.dayoook_e.mapping.domain.Day;
 import inha.dayoook_e.mapping.domain.TimeSlot;
@@ -10,10 +12,7 @@ import inha.dayoook_e.mapping.domain.repository.DayJpaRepository;
 import inha.dayoook_e.mapping.domain.repository.TimeSlotJpaRepository;
 import inha.dayoook_e.tutor.api.controller.dto.request.SearchCond;
 import inha.dayoook_e.tutor.api.controller.dto.request.TutorScheduleRequest;
-import inha.dayoook_e.tutor.api.controller.dto.response.SearchExperienceResponse;
-import inha.dayoook_e.tutor.api.controller.dto.response.TutorResponse;
-import inha.dayoook_e.tutor.api.controller.dto.response.TutorSearchPageResponse;
-import inha.dayoook_e.tutor.api.controller.dto.response.TutorSearchResponse;
+import inha.dayoook_e.tutor.api.controller.dto.response.*;
 import inha.dayoook_e.tutor.api.mapper.TutorMapper;
 import inha.dayoook_e.tutor.domain.Experience;
 import inha.dayoook_e.tutor.domain.TutorAgeGroup;
@@ -43,6 +42,7 @@ import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.common.Constant.NAME;
 import static inha.dayoook_e.common.code.status.ErrorStatus.INVALID_ROLE;
 import static inha.dayoook_e.common.code.status.ErrorStatus.NOT_FIND_USER;
+import static inha.dayoook_e.user.domain.enums.Role.TUTOR;
 
 /**
  * TutorServiceImpl은 튜터 관련 비즈니스 로직을 처리하는 서비스 클래스.
@@ -60,9 +60,8 @@ public class TutorServiceImpl implements TutorService {
     private final TutorQueryRepository tutorQueryRepository;
     private final UserJpaRepository userJpaRepository;
     private final TutorMapper tutorMapper;
-    private final UserMapper userMapper;
-    private final DayJpaRepository dayJpaRepository;
     private final TutorScheduleJpaRepository tutorScheduleJpaRepository;
+    private final DayJpaRepository dayJpaRepository;
     private final TimeSlotJpaRepository timeSlotJpaRepository;
     private final MappingMapper mappingMapper;
 
@@ -93,7 +92,7 @@ public class TutorServiceImpl implements TutorService {
                 .orElseThrow(() -> new BaseException(NOT_FIND_USER));
 
         // 2. Role이 tutor인지 확인
-        if (tutor.getRole().equals(Role.TUTOR) == false)
+        if (tutor.getRole().equals(TUTOR) == false)
             throw new BaseException(INVALID_ROLE);
         TutorInfo tutorInfo = tutor.getTutorInfo();
 
@@ -137,7 +136,7 @@ public class TutorServiceImpl implements TutorService {
     @Override
     public TutorResponse createSchedule(User user, TutorScheduleRequest tutorScheduleRequest) {
         // 1. Role이 TUTOR인지 확인
-        if (!user.getRole().equals(Role.TUTOR)) {
+        if (!user.getRole().equals(TUTOR)) {
             throw new BaseException(INVALID_ROLE);
         }
 
@@ -190,5 +189,56 @@ public class TutorServiceImpl implements TutorService {
 
         // 7. 응답 생성
         return tutorMapper.toTutorResponse(user);
+    }
+
+    /**
+     * 튜터 일정 조회
+     *
+     * @param user 사용자 정보
+     * @param tutorId 튜터 ID
+     * @return SearchTutorScheduleResponse
+     */
+    @Override
+    public SearchTutorScheduleResponse getTutorSchedule(User user, Integer tutorId) {
+        // 1. tutorId로 튜터 조회
+        User tutor = userJpaRepository.findByIdAndState(tutorId, ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_FIND_USER));
+
+        // 2. Role이 TUTOR인지 확인
+        if (!tutor.getRole().equals(TUTOR) && !user.getId().equals(tutorId) && !user.getRole().equals(Role.ADMIN)) {
+            throw new BaseException(INVALID_ROLE);
+        }
+
+        // 3. 모든 요일과 시간대 조회
+        List<Day> allDays = dayJpaRepository.findAll();
+        List<TimeSlot> allTimeSlots = timeSlotJpaRepository.findAll();
+
+        // 4. 튜터의 기존 스케줄 조회
+        List<TutorSchedule> existingSchedules = tutorScheduleJpaRepository.findByUserId(tutorId);
+
+        // 5. 모든 가능한 조합에 대한 스케줄 데이터 생성
+        List<TutorScheduleData> scheduleDataList = new ArrayList<>();
+
+        for (Day day : allDays) {
+            for (TimeSlot timeSlot : allTimeSlots) {
+                // 해당 요일과 시간대에 대한 기존 스케줄 찾기
+                boolean isAvailable = existingSchedules.stream()
+                        .filter(schedule ->
+                                schedule.getDay().getId().equals(day.getId()) &&
+                                        schedule.getTimeSlot().getId().equals(timeSlot.getId())
+                        )
+                        .findFirst()
+                        .map(TutorSchedule::getIsAvailable)
+                        .orElse(false); // 스케줄이 없는 경우 false 반환
+
+                // 응답 데이터 생성
+                SearchDayResponse dayResponse = mappingMapper.toSearchDayResponse(day.getId(), day.getName());
+                SearchTimeSlotResponse timeSlotResponse = mappingMapper.toSearchTimeSlotResponse(timeSlot.getId(), timeSlot.getTime());
+                TutorScheduleData scheduleData = tutorMapper.toTutorScheduleData(dayResponse, timeSlotResponse, isAvailable);
+                scheduleDataList.add(scheduleData);
+            }
+        }
+        // 6. 최종 응답 생성
+        return tutorMapper.toSearchTutorScheduleResponse(tutor, scheduleDataList);
     }
 }
