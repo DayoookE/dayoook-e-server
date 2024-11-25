@@ -1,19 +1,25 @@
 package inha.dayoook_e.tutor.api.service;
 
-import inha.dayoook_e.application.domain.repository.ApplicationJpaRepository;
-import inha.dayoook_e.common.BaseEntity;
 import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchAgeGroupResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
 import inha.dayoook_e.mapping.api.mapper.MappingMapper;
+import inha.dayoook_e.mapping.domain.Day;
+import inha.dayoook_e.mapping.domain.TimeSlot;
+import inha.dayoook_e.mapping.domain.repository.DayJpaRepository;
+import inha.dayoook_e.mapping.domain.repository.TimeSlotJpaRepository;
 import inha.dayoook_e.tutor.api.controller.dto.request.SearchCond;
+import inha.dayoook_e.tutor.api.controller.dto.request.TutorScheduleRequest;
 import inha.dayoook_e.tutor.api.controller.dto.response.SearchExperienceResponse;
+import inha.dayoook_e.tutor.api.controller.dto.response.TutorResponse;
 import inha.dayoook_e.tutor.api.controller.dto.response.TutorSearchPageResponse;
 import inha.dayoook_e.tutor.api.controller.dto.response.TutorSearchResponse;
 import inha.dayoook_e.tutor.api.mapper.TutorMapper;
 import inha.dayoook_e.tutor.domain.Experience;
 import inha.dayoook_e.tutor.domain.TutorAgeGroup;
 import inha.dayoook_e.tutor.domain.TutorInfo;
+import inha.dayoook_e.tutor.domain.TutorSchedule;
+import inha.dayoook_e.tutor.domain.id.TutorScheduleId;
 import inha.dayoook_e.tutor.domain.repository.*;
 import inha.dayoook_e.user.api.mapper.UserMapper;
 import inha.dayoook_e.user.domain.User;
@@ -30,6 +36,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
@@ -54,6 +61,9 @@ public class TutorServiceImpl implements TutorService {
     private final UserJpaRepository userJpaRepository;
     private final TutorMapper tutorMapper;
     private final UserMapper userMapper;
+    private final DayJpaRepository dayJpaRepository;
+    private final TutorScheduleJpaRepository tutorScheduleJpaRepository;
+    private final TimeSlotJpaRepository timeSlotJpaRepository;
     private final MappingMapper mappingMapper;
 
     /**
@@ -115,5 +125,70 @@ public class TutorServiceImpl implements TutorService {
 
 
         return tutorMapper.toTutorSearchResponse(tutor, tutorInfo, searchLanguagesResponses, searchAgeGroupResponses, searchExperienceResponses);
+    }
+
+    /**
+     * 튜터 일정 생성
+     *
+     * @param user 사용자 정보
+     * @param tutorScheduleRequest 튜터 일정 생성 요청
+     * @return TutorResponse
+     */
+    @Override
+    public TutorResponse createSchedule(User user, TutorScheduleRequest tutorScheduleRequest) {
+        // 1. Role이 TUTOR인지 확인
+        if (!user.getRole().equals(Role.TUTOR)) {
+            throw new BaseException(INVALID_ROLE);
+        }
+
+        // 2. 요일과 시간대 정보 조회
+        List<Day> days = dayJpaRepository.findAllById(tutorScheduleRequest.dayIds());
+        List<TimeSlot> timeSlots = timeSlotJpaRepository.findAllById(tutorScheduleRequest.timeSlotIds());
+
+        // 3. 현재 존재하는 스케줄 조회
+        List<TutorSchedule> existingSchedules = tutorScheduleJpaRepository.findByUserId(user.getId());
+
+        // 4. 새로운 스케줄 조합 생성
+        List<TutorSchedule> newSchedules = new ArrayList<>();
+
+        for (Day day : days) {
+            for (TimeSlot timeSlot : timeSlots) {
+                TutorScheduleId scheduleId = tutorMapper.toTutorScheduleId(
+                        user.getId(),
+                        day.getId(),
+                        timeSlot.getId()
+                );
+
+                // 기존 스케줄에 있는지 확인
+                boolean exists = existingSchedules.stream()
+                        .anyMatch(schedule -> schedule.getId().equals(scheduleId));
+                if (!exists) {
+                    // 새로운 스케줄 생성
+                    TutorSchedule schedule = tutorMapper.toTutorSchedule(user, day, timeSlot);
+                    newSchedules.add(schedule);
+                }
+            }
+        }
+
+        // 5. 기존 스케줄 중 새로운 요청에 없는 스케줄은 isAvailable을 false로 설정
+        existingSchedules.forEach(schedule -> {
+            boolean keepAvailable = days.stream()
+                    .anyMatch(day -> day.getId().equals(schedule.getId().getDayId()))
+                    &&
+                    timeSlots.stream()
+                            .anyMatch(timeSlot -> timeSlot.getId().equals(schedule.getId().getTimeSlotId()));
+
+            if (!keepAvailable) {
+                schedule.makeUnavailable();
+            }
+        });
+
+        // 6. 새로운 스케줄 저장
+        if (!newSchedules.isEmpty()) {
+            tutorScheduleJpaRepository.saveAll(newSchedules);
+        }
+
+        // 7. 응답 생성
+        return tutorMapper.toTutorResponse(user);
     }
 }
