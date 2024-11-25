@@ -7,6 +7,6 @@ import inha.dayoook_e.user.domain.User;
 
 public interface ApplicationService {
     ApplicationResponse apply(User user, ApplyRequest applyRequest);
-    ApplicationResponse approveApplication(User tutor, Integer applicationId);
-    ApplicationResponse rejectApplication(User user, Integer applicationId);
+    ApplicationResponse approveApplication(User tutor, Integer applicationGroupId);
+    ApplicationResponse rejectApplication(User user, Integer applicationGroupId);
 }

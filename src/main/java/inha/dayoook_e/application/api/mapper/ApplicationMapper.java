@@ -50,5 +50,5 @@ public interface ApplicationMapper {
 
 
     @Mapping(target = "id", source = "applicationGroup.id")
-    ApplicationResponse toApplicationResponse(ApplicationGroup applicationGroup, List<Application> savedApplications);
+    ApplicationResponse toApplicationResponse(ApplicationGroup applicationGroup);
 }

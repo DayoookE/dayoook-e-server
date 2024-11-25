@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static inha.dayoook_e.application.domain.enums.Status.REJECTED;
+import static inha.dayoook_e.application.domain.enums.Status.*;
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.common.code.status.ErrorStatus.*;
 
@@ -97,8 +97,15 @@ public class ApplicationServiceImpl implements ApplicationService{
         validateRequestedIds(requestedDayIds, dayMap.keySet(), requestedTimeSlotIds, timeSlotMap.keySet());
 
         // 6. 기존 신청 내역 조회 및 중복 검증
-        List<Application> existingApplications = applicationJpaRepository.findByTuteeAndStatusAndTutor(
-                tutee, Status.APPLYING, tutor);
+        List<Application> existingApplications = applicationJpaRepository.findByTuteeAndTutor(tutee, tutor)
+                .stream()
+                .filter(app -> app.getApplicationGroup().getStatus().equals(APPLYING) || app.getApplicationGroup().getStatus().equals(APPROVED))
+                .toList();
+
+        if (!existingApplications.isEmpty()) {
+            throw new BaseException(DUPLICATE_APPLICATION);
+        }
+
         validateNoDuplicateApplications(existingApplications, applyRequest.timeSlots(), dayMap, timeSlotMap);
 
         // 7. 요청된 모든 시간대에 대한 TutorSchedule 조회 또는 생성
@@ -132,7 +139,7 @@ public class ApplicationServiceImpl implements ApplicationService{
                 .tutee(tutee)
                 .tutor(tutor)
                 .message(applyRequest.message())
-                .status(Status.APPLYING)
+                .status(APPLYING)
                 .build();
         applicationGroup = applicationGroupJpaRepository.save(applicationGroup);
 
@@ -147,20 +154,140 @@ public class ApplicationServiceImpl implements ApplicationService{
                     .tutor(tutor)
                     .day(day)
                     .timeSlot(timeSlot)
-                    .status(Status.APPLYING)
+                    .status(APPLYING)
                     .applicationGroup(applicationGroup)  // ApplicationGroup 연결 추가
                     .applicationAt(LocalDateTime.now()) // 신청 시간 설정
                     .build();
             applications.add(application);
         }
 
-        List<Application> savedApplications = applicationJpaRepository.saveAll(applications);
+        applicationJpaRepository.saveAll(applications);
 
         // 11. ApplicationGroup 기반 응답 생성
-        return applicationMapper.toApplicationResponse(applicationGroup, savedApplications);
+        return applicationMapper.toApplicationResponse(applicationGroup);
     }
 
-    // 중복 신청 검증 메소드 - Status가 APPLYING인 경우에 대해서만 중복 체크
+
+
+    /**
+     * 강의 신청 승인
+     *
+     * @param tutor 로그인 한 튜터
+     * @param applicationGroupId 승인할 신청 그룹 id
+     * @return 신청 승인 결과
+     */
+    @Override
+    public ApplicationResponse approveApplication(User tutor, Integer applicationGroupId) {
+        // 1. tutor의 권한이 tutor인지 확인
+        if (!tutor.getRole().equals(Role.TUTOR)) {
+            throw new BaseException(INVALID_ROLE);
+        }
+
+        // 2. ApplicationGroup 조회
+        ApplicationGroup applicationGroup = applicationGroupJpaRepository.findById(applicationGroupId)
+                .orElseThrow(() -> new BaseException(APPLICATION_GROUP_NOT_FOUND));
+
+        // 3. ApplicationGroup의 튜터와 로그인한 튜터가 일치하는지 확인
+        if (!applicationGroup.getTutor().getId().equals(tutor.getId())) {
+            throw new BaseException(INVALID_ROLE);
+        }
+
+        // 4. ApplicationGroup의 상태가 APPLYING인지 확인
+        if (applicationGroup.getStatus() != APPLYING) {
+            throw new BaseException(INVALID_APPLICATION_STATUS);
+        }
+
+        // 5. 모든 시간대에 대해 스케줄 가용성 확인
+        for (Application application : applicationGroup.getApplications()) {
+            TutorScheduleId scheduleId = new TutorScheduleId(
+                    tutor.getId(),
+                    application.getDay().getId(),
+                    application.getTimeSlot().getId()
+            );
+
+            TutorSchedule tutorSchedule = tutorScheduleJpaRepository.findById(scheduleId)
+                    .orElseThrow(() -> new BaseException(SCHEDULE_NOT_FOUND));
+
+            if (!tutorSchedule.getIsAvailable()) {
+                throw new BaseException(SCHEDULE_ALREADY_BOOKED);
+            }
+        }
+
+        // 6. 모든 검증이 통과되면, 각 Application에 대해 처리
+        for (Application application : applicationGroup.getApplications()) {
+            // 6.1. TutorSchedule 업데이트
+            TutorScheduleId scheduleId = new TutorScheduleId(
+                    tutor.getId(),
+                    application.getDay().getId(),
+                    application.getTimeSlot().getId()
+            );
+            TutorSchedule tutorSchedule = tutorScheduleJpaRepository.findById(scheduleId).get();
+            tutorSchedule.makeUnavailable();
+
+            // 6.2. Course 생성
+            CreateCourseRequest createCourseRequest = courseMapper.toCreateCourseRequest(application);
+            CourseResponse courseResponse = courseService.createCourse(createCourseRequest);
+            log.info("Course 생성 성공, Course ID : {}", courseResponse.id());
+
+            // 6.3. Application 상태 변경
+            application.changeStatus(APPROVED);
+        }
+
+        // 7. ApplicationGroup 상태 변경
+        applicationGroup.changeStatus(APPROVED);
+
+        // 8. 결과 반환
+        return applicationMapper.toApplicationResponse(applicationGroup);
+    }
+
+    /**
+     * 강의 신청 거절
+     *
+     * @param tutor 로그인 한 튜터
+     * @param applicationGroupId 거절할 신청 그룹 id
+     * @return 신청 거절 결과
+     */
+    @Override
+    public ApplicationResponse rejectApplication(User tutor, Integer applicationGroupId) {
+        // 1. tutor의 권한이 tutor인지 확인
+        if (!tutor.getRole().equals(Role.TUTOR)) {
+            throw new BaseException(INVALID_ROLE);
+        }
+
+        // 2. ApplicationGroup 조회
+        ApplicationGroup applicationGroup = applicationGroupJpaRepository.findById(applicationGroupId)
+                .orElseThrow(() -> new BaseException(APPLICATION_GROUP_NOT_FOUND));
+
+        // 3. ApplicationGroup의 튜터와 로그인한 튜터가 일치하는지 확인
+        if (!applicationGroup.getTutor().getId().equals(tutor.getId())) {
+            throw new BaseException(INVALID_ROLE);
+        }
+
+        // 4. ApplicationGroup의 상태가 APPLYING인지 확인
+        if (applicationGroup.getStatus() != APPLYING) {
+            throw new BaseException(INVALID_APPLICATION_STATUS);
+        }
+
+        // 5. 모든 Application의 상태를 REJECTED로 변경
+        for (Application application : applicationGroup.getApplications()) {
+            application.changeStatus(Status.REJECTED);
+        }
+
+        // 6. ApplicationGroup 상태 변경
+        applicationGroup.changeStatus(Status.REJECTED);
+
+        // 7. 결과 반환
+        return applicationMapper.toApplicationResponse(applicationGroup);
+    }
+
+    /**
+     * 기존 신청 내역 중 중복 신청 검증
+     *
+     * @param existingApplications 기존 신청 내역
+     * @param timeSlotRequests 요청된 시간대들
+     * @param dayMap 요일 정보
+     * @param timeSlotMap 시간대 정보
+     */
     private void validateNoDuplicateApplications(
             List<Application> existingApplications,
             List<TimeSlotRequest> timeSlotRequests,
@@ -175,7 +302,7 @@ public class ApplicationServiceImpl implements ApplicationService{
                     .anyMatch(app ->
                             app.getDay().equals(day) &&
                                     app.getTimeSlot().equals(timeSlot) &&
-                                    app.getApplicationGroup().getStatus() == Status.APPLYING
+                                    app.getApplicationGroup().getStatus() == APPLYING
                     );
 
             if (isDuplicate) {
@@ -184,6 +311,14 @@ public class ApplicationServiceImpl implements ApplicationService{
         }
     }
 
+    /**
+     * 요청된 요일과 시간대 ID들이 존재하는지 검증
+     *
+     * @param requestedDayIds 요청된 요일 ID들
+     * @param foundDayIds 존재하는 요일 ID들
+     * @param requestedTimeSlotIds 요청된 시간대 ID들
+     * @param foundTimeSlotIds 존재하는 시간대 ID들
+     */
     private void validateRequestedIds(
             Set<Integer> requestedDayIds,
             Set<Integer> foundDayIds,
@@ -196,75 +331,5 @@ public class ApplicationServiceImpl implements ApplicationService{
         if (!foundTimeSlotIds.containsAll(requestedTimeSlotIds)) {
             throw new BaseException(INVALID_TIME_SLOT_ID);
         }
-    }
-
-    /**
-     * 강의 신청 승인
-     *
-     * @param tutor 로그인 한 튜터
-     * @param applicationId 승인할 신청 id
-     * @return 신청 승인 결과
-     */
-    @Override
-    public ApplicationResponse approveApplication(User tutor, Integer applicationId) {
-        // 1. tutor의 권한이 tutor인지 확인
-        if (!tutor.getRole().equals(Role.TUTOR))
-            throw new BaseException(INVALID_ROLE);
-
-        // 2. application 조회
-        Application application = applicationJpaRepository.findById(applicationId)
-                .orElseThrow(() -> new BaseException(APPLICATION_NOT_FOUND));
-
-
-        // 2. 튜터 스케줄 조회, 없으면 오류 반환
-        TutorScheduleId scheduleId = new TutorScheduleId(application.getTutor().getId(), application.getDay().getId(), application.getTimeSlot().getId());
-        TutorSchedule tutorSchedule = tutorScheduleJpaRepository.findById(scheduleId)
-                .orElseThrow(() -> new BaseException(SCHEDULE_NOT_FOUND));
-
-        // 3. 스케줄이 available 하다면 신청 승인
-        if (tutorSchedule.getIsAvailable()) {
-
-            // 3-1. 스케쥴 isAvailable 변경
-            tutorSchedule.makeUnavailable();
-
-            // 3-2. application status 변경
-            //application.changeStatus(Status.APPROVED);
-
-            // 3-2. Course 생성
-            CreateCourseRequest createCourseRequest = courseMapper.toCreateCourseRequest(application);
-            CourseResponse courseResponse = courseService.createCourse(createCourseRequest);
-            log.info("Course 생성 성공, Course ID : {}", courseResponse.id());
-
-            // 3-3. Application response 반환
-            return applicationMapper.applicationToApplicationResponse(application);
-        }
-        // 4. 스케줄이 unavailable 하다면 오류 반환
-        else {
-            throw new BaseException(SCHEDULE_ALREADY_BOOKED);
-        }
-    }
-
-    /**
-     * 강의 신청 거절
-     *
-     * @param tutor 로그인 한 튜터
-     * @param applicationId 거절할 신청 id
-     * @return 신청 거절 결과
-     */
-    @Override
-    public ApplicationResponse rejectApplication(User tutor, Integer applicationId) {
-        // 1. tutor의 권한이 tutor인지 확인
-        if (!tutor.getRole().equals(Role.TUTOR))
-            throw new BaseException(INVALID_ROLE);
-
-        // 2. application 조회
-        Application application = applicationJpaRepository.findById(applicationId)
-                .orElseThrow(() -> new BaseException(APPLICATION_NOT_FOUND));
-
-        // 3. 신청 거절 (거절에는 이유가 필요 없음)
-        //application.changeStatus(Status.REJECTED);
-
-        // 4. application Reponse반환
-        return applicationMapper.applicationToApplicationResponse(application);
     }
 }

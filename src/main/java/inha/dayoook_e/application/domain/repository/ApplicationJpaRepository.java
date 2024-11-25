@@ -11,5 +11,5 @@ import java.util.List;
  * ApplicationJpaRepository는 Application 엔티티에 대한 데이터 액세스 기능을 제공.
  */
 public interface ApplicationJpaRepository extends JpaRepository<Application, Integer> {
-    List<Application> findByTuteeAndStatusAndTutor(User tutee, Status status, User tutor);
+    List<Application> findByTuteeAndTutor(User tutee, User tutor);
 }
