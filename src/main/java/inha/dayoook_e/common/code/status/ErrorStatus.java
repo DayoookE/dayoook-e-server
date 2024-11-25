@@ -32,6 +32,10 @@ public enum ErrorStatus implements BaseErrorCode {
 
     INVALID_ROLE(HttpStatus.BAD_REQUEST, "ROLE4000", "잘못된 유저 권한입니다."),
 
+    DAY_NOT_FOUND(HttpStatus.NOT_FOUND, "DAY4000", "요일을 찾을 수 없습니다."),
+    TIME_SLOT_NOT_FOUND(HttpStatus.NOT_FOUND, "TIMESLOT4000", "시간대를 찾을 수 없습니다."),
+    INVALID_DAY_ID(HttpStatus.BAD_REQUEST, "DAY4001", "유효하지 않은 요일 ID입니다."),
+    INVALID_TIME_SLOT_ID(HttpStatus.BAD_REQUEST, "TIMESLOT4001", "유효하지 않은 시간대 ID입니다."),
 
     SONG_NOT_FOUND(HttpStatus.NOT_FOUND, "SONG4000", "동요를 찾을 수 없습니다."),
     SONG_ALREADY_COMPLETE(HttpStatus.BAD_REQUEST, "SONG4001", "이미 완료한 동요입니다."),

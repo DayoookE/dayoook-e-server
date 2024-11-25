@@ -45,4 +45,8 @@ public class TutorSchedule {
     public void makeUnavailable() {
         this.isAvailable = false;
     }
+
+    public void makeAvailable() {
+        this.isAvailable = true;
+    }
 }
