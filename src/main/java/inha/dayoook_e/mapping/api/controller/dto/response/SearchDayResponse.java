@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record SearchDayResponse(
         @NotNull
-        @Schema(description = "요 id", example = "1")
+        @Schema(description = "요일 id", example = "1")
         Integer id,
         @NotNull
         @Schema(description = "요일 이름", example = "한국")

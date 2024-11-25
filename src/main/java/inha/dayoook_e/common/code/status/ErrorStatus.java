@@ -32,6 +32,10 @@ public enum ErrorStatus implements BaseErrorCode {
 
     INVALID_ROLE(HttpStatus.BAD_REQUEST, "ROLE4000", "잘못된 유저 권한입니다."),
 
+    DAY_NOT_FOUND(HttpStatus.NOT_FOUND, "DAY4000", "요일을 찾을 수 없습니다."),
+    TIME_SLOT_NOT_FOUND(HttpStatus.NOT_FOUND, "TIMESLOT4000", "시간대를 찾을 수 없습니다."),
+    INVALID_DAY_ID(HttpStatus.BAD_REQUEST, "DAY4001", "유효하지 않은 요일 ID입니다."),
+    INVALID_TIME_SLOT_ID(HttpStatus.BAD_REQUEST, "TIMESLOT4001", "유효하지 않은 시간대 ID입니다."),
 
     SONG_NOT_FOUND(HttpStatus.NOT_FOUND, "SONG4000", "동요를 찾을 수 없습니다."),
     SONG_ALREADY_COMPLETE(HttpStatus.BAD_REQUEST, "SONG4001", "이미 완료한 동요입니다."),
@@ -40,6 +44,10 @@ public enum ErrorStatus implements BaseErrorCode {
     SCHEDULE_ALREADY_BOOKED(HttpStatus.BAD_REQUEST, "SCHEDULE4001", "이미 예약된 스케줄입니다."),
 
     APPLICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "APPLICATION4000", "신청 정보를 찾을 수 없습니다."),
+    DUPLICATE_APPLICATION(HttpStatus.BAD_REQUEST, "APPLICATION4001", "이미 신청한 강의가 있습니다."),
+    SCHEDULE_NOT_AVAILABLE(HttpStatus.BAD_REQUEST, "APPLICATION4002", "해당 시간에 수업이 불가능합니다."),
+    INVALID_APPLICATION_STATUS(HttpStatus.BAD_REQUEST, "APPLICATION4003", "유효하지 처않은 신청 상태입니다."),
+    APPLICATION_GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "APPLICATION4004", "신청 그룹을 찾을 수 없습니다."),
 
     STORYBOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "STORYBOOK4000", "동화를 찾을 수 없습니다."),
     STORYBOOK_ALREADY_COMPLETE(HttpStatus.BAD_REQUEST, "STORYBOOK4001", "이미 완료한 동화입니다."),

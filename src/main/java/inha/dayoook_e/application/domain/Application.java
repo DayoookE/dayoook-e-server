@@ -31,11 +31,8 @@ public class Application {
     private LocalDateTime applicationAt; // 신청 날짜
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private Status status; // 신청 상태
+    private Status status;
 
-    @Column(nullable = false, length = 100)
-    private String message; // 튜터에게 전할 요청 사항
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tutor_id", nullable = false)
@@ -52,6 +49,10 @@ public class Application {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "time_slot_id", nullable = false)
     private TimeSlot timeSlot;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "application_group_id", nullable = false)
+    private ApplicationGroup applicationGroup;
 
     public void changeStatus(Status status) {
         this.status = status;

@@ -2,8 +2,10 @@ package inha.dayoook_e.tutor.api.controller;
 
 import inha.dayoook_e.common.BaseResponse;
 import inha.dayoook_e.common.exceptions.BaseException;
-import inha.dayoook_e.song.api.controller.dto.response.SongSearchResponse;
 import inha.dayoook_e.tutor.api.controller.dto.request.SearchCond;
+import inha.dayoook_e.tutor.api.controller.dto.request.TutorScheduleRequest;
+import inha.dayoook_e.tutor.api.controller.dto.response.SearchTutorScheduleResponse;
+import inha.dayoook_e.tutor.api.controller.dto.response.TutorResponse;
 import inha.dayoook_e.tutor.api.controller.dto.response.TutorSearchPageResponse;
 import inha.dayoook_e.tutor.api.controller.dto.response.TutorSearchResponse;
 import inha.dayoook_e.tutor.api.service.TutorService;
@@ -59,5 +61,37 @@ public class TutorController {
     public BaseResponse<TutorSearchResponse> getTutor(
             @PathVariable("tutorId") Integer tutorId) {
         return BaseResponse.of(TUTOR_SEARCH_OK, tutorService.getTutor(tutorId));
+    }
+
+    /**
+     * 튜터 일정 조회 API
+     *
+     * <p>튜터 일정을 조회합니다.</p>
+     *
+     * @param user 사용자 정보
+     * @param tutorId 튜터 ID
+     * @return 튜터 일정 조회 결과를 포함하는 BaseResponse<SearchTutorScheduleResponse>
+     */
+    @GetMapping("/schedule/{tutorId}")
+    @Operation(summary = "튜터 일정 조회 API", description = "튜터 일정을 조회합니다.")
+    public BaseResponse<SearchTutorScheduleResponse> getTutorSchedule(@AuthenticationPrincipal User user,
+                                                                      @PathVariable("tutorId") Integer tutorId) {
+        return BaseResponse.of(TUTOR_SCHEDULE_SEARCH_OK, tutorService.getTutorSchedule(user, tutorId));
+    }
+
+    /**
+     * 튜터 일정 생성 API
+     *
+     * <p>튜터 일정을 생성합니다.</p>
+     *
+     * @param user 사용자 정보
+     * @param tutorScheduleRequest 튜터 일정 생성 요청
+     * @return 튜터 일정 생성 결과를 포함하는 BaseResponse<List<TutorScheduleResponse>>
+     */
+    @PostMapping("/schedule")
+    @Operation(summary = "튜터 일정 생성 API", description = "튜터 일정을 생성합니다.")
+    public BaseResponse<TutorResponse> createSchedule(@AuthenticationPrincipal User user,
+                                                                    @Validated @RequestBody TutorScheduleRequest tutorScheduleRequest) {
+        return BaseResponse.of(TUTOR_SCHEDULE_CREATE_OK ,tutorService.createSchedule(user, tutorScheduleRequest));
     }
 }

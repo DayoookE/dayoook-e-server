@@ -1,12 +1,16 @@
 package inha.dayoook_e.tutor.api.mapper;
 
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchAgeGroupResponse;
+import inha.dayoook_e.mapping.api.controller.dto.response.SearchDayResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
-import inha.dayoook_e.tutor.api.controller.dto.response.SearchExperienceResponse;
-import inha.dayoook_e.tutor.api.controller.dto.response.TutorSearchPageResponse;
-import inha.dayoook_e.tutor.api.controller.dto.response.TutorSearchResponse;
+import inha.dayoook_e.mapping.api.controller.dto.response.SearchTimeSlotResponse;
+import inha.dayoook_e.mapping.domain.Day;
+import inha.dayoook_e.mapping.domain.TimeSlot;
+import inha.dayoook_e.tutor.api.controller.dto.response.*;
 import inha.dayoook_e.tutor.domain.Experience;
 import inha.dayoook_e.tutor.domain.TutorInfo;
+import inha.dayoook_e.tutor.domain.TutorSchedule;
+import inha.dayoook_e.tutor.domain.id.TutorScheduleId;
 import inha.dayoook_e.user.api.controller.dto.request.TutorSignupRequest;
 import inha.dayoook_e.user.domain.User;
 import org.mapstruct.Mapper;
@@ -88,4 +92,43 @@ public interface TutorMapper {
      */
     SearchExperienceResponse toSearchExperienceResponse(Experience experience);
 
+
+    /**
+     * 튜터 응답 Dto 생성
+     *
+     * @param user 튜터 정보
+     * @return 튜터 응답
+     */
+    TutorResponse toTutorResponse(User user);
+
+    TutorScheduleId toTutorScheduleId(Integer userId, Integer dayId, Integer timeSlotId);
+
+    default TutorSchedule toTutorSchedule(User user, Day day, TimeSlot timeSlot) {
+        return TutorSchedule.builder()
+                .id(new TutorScheduleId(user.getId(), day.getId(), timeSlot.getId()))
+                .user(user)
+                .day(day)
+                .timeSlot(timeSlot)
+                .isAvailable(true)
+                .build();
+    }
+
+    /**
+     * 튜터 일정 조회 응답 Dto 생성
+     *
+     * @param day 요일
+     * @param timeSlot 시간대
+     * @param isAvailable 튜터가 해당 시간에 수업 가능한지 여부
+     * @return 튜터 일정 조회 응답 Dto
+     */
+    TutorScheduleData toTutorScheduleData(SearchDayResponse day, SearchTimeSlotResponse timeSlot, boolean isAvailable);
+
+    /**
+     * 튜터 일정 조회 응답 Dto 리스트 생성
+     *
+     * @param user 튜터 정보
+     * @param tutorScheduleDataList 튜터 일정 조회 응답 Dto 리스트
+     * @return 튜터 일정 조회 응답 Dto 리스트
+     */
+    SearchTutorScheduleResponse toSearchTutorScheduleResponse(User user, List<TutorScheduleData> tutorScheduleDataList);
 }
