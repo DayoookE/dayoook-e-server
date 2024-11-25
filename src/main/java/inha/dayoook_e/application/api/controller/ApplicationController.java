@@ -23,7 +23,7 @@ import static inha.dayoook_e.common.code.status.SuccessStatus.*;
 @Tag(name = "application controller", description = "강의 신청 관련 API")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/application")
+@RequestMapping("/api/v1/applications")
 public class ApplicationController {
     private final ApplicationService applicationService;
 
