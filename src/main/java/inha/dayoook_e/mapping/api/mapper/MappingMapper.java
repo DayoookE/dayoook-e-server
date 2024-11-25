@@ -63,7 +63,7 @@ public interface MappingMapper {
      * @param time 시간대
      * @return 시간대 조회 응답 DTO
      */
-    SearchTimeSlotResponse toSearchTimeSlotResponse(Integer id, String time);
+    SearchTimeSlotResponse  toSearchTimeSlotResponse(Integer id, String time);
 
     /**
      * 포인트 생성

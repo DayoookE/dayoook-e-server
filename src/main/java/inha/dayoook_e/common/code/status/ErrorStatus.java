@@ -44,6 +44,8 @@ public enum ErrorStatus implements BaseErrorCode {
     SCHEDULE_ALREADY_BOOKED(HttpStatus.BAD_REQUEST, "SCHEDULE4001", "이미 예약된 스케줄입니다."),
 
     APPLICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "APPLICATION4000", "신청 정보를 찾을 수 없습니다."),
+    DUPLICATE_APPLICATION(HttpStatus.BAD_REQUEST, "APPLICATION4001", "이미 신청한 강의가 있습니다."),
+    SCHEDULE_NOT_AVAILABLE(HttpStatus.BAD_REQUEST, "APPLICATION4002", "해당 시간에 수업이 불가능합니다."),
 
     STORYBOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "STORYBOOK4000", "동화를 찾을 수 없습니다."),
     STORYBOOK_ALREADY_COMPLETE(HttpStatus.BAD_REQUEST, "STORYBOOK4001", "이미 완료한 동화입니다."),

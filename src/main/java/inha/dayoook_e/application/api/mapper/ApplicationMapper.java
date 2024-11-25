@@ -3,6 +3,7 @@ package inha.dayoook_e.application.api.mapper;
 import inha.dayoook_e.application.api.controller.dto.request.ApplyRequest;
 import inha.dayoook_e.application.api.controller.dto.response.ApplicationResponse;
 import inha.dayoook_e.application.domain.Application;
+import inha.dayoook_e.application.domain.ApplicationGroup;
 import inha.dayoook_e.application.domain.enums.Status;
 import inha.dayoook_e.mapping.domain.Day;
 import inha.dayoook_e.mapping.domain.TimeSlot;
@@ -14,6 +15,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * ApplicationMapper는 강의 신청과 관련된 데이터 변환 기능을 제공.
@@ -45,4 +47,8 @@ public interface ApplicationMapper {
     @Mapping(target = "id", ignore = true)
     Application toApplication(User tutee, User tutor, Day day, TimeSlot timeSlot,
                               LocalDateTime applicationAt, Status status, String message);
+
+
+    @Mapping(target = "id", source = "applicationGroup.id")
+    ApplicationResponse toApplicationResponse(ApplicationGroup applicationGroup, List<Application> savedApplications);
 }

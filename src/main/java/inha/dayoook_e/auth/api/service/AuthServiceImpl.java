@@ -47,8 +47,10 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
+        log.info("사용자 {} 로그인 시도!!!222", loginRequest.email());
         User findUser = userJpaRepository.findByEmailAndState(loginRequest.email(), ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_FIND_USER));
+        log.info("사용자 {} 로그인 시도!!!", loginRequest.email());
         try{
             authenticationManager.authenticate
                     (new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password()));
