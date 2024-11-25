@@ -2,9 +2,12 @@ package inha.dayoook_e.user.api.mapper;
 
 import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.mapping.domain.Language;
+import inha.dayoook_e.tutee.domain.TuteeInfo;
 import inha.dayoook_e.user.api.controller.dto.request.TuteeSignupRequest;
 import inha.dayoook_e.user.api.controller.dto.request.TutorSignupRequest;
 import inha.dayoook_e.user.api.controller.dto.response.SignupResponse;
+import inha.dayoook_e.user.api.controller.dto.response.TuteeInfoResponse;
+import inha.dayoook_e.user.api.controller.dto.response.TutorInfoResponse;
 import inha.dayoook_e.user.api.controller.dto.response.UserInfoResponse;
 import inha.dayoook_e.user.domain.User;
 import inha.dayoook_e.user.domain.UserLanguage;
@@ -78,11 +81,17 @@ public interface UserMapper {
      */
     SignupResponse userToSignupResponse(User savedUser);
 
+
     /**
-     * User를 UserInfoResponse로 변환
+     * User와 TuteeInfo를 TuteeInfoResponse로 변환
      *
      * @param user 유저 엔티티
-     * @return UserInfoResponse
+     * @param tuteeInfo 튜티 정보 엔티티
+     * @return TuteeInfoResponse
      */
-    UserInfoResponse userToUserInfoResponse(User user);
+    @Mapping(target ="id", source = "user.id")
+    TuteeInfoResponse userToTuteeInfoResponse(User user, TuteeInfo tuteeInfo);
+
+    @Mapping(target ="id", source = "user.id")
+    TutorInfoResponse userToTutorInfoResponse(User user);
 }
