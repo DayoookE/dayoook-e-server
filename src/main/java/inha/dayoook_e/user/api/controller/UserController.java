@@ -6,11 +6,13 @@ import inha.dayoook_e.user.api.controller.dto.request.TutorSignupRequest;
 import inha.dayoook_e.user.api.controller.dto.response.SignupResponse;
 import inha.dayoook_e.user.api.controller.dto.response.UserInfoResponse;
 import inha.dayoook_e.user.api.service.UserService;
+import inha.dayoook_e.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,13 +37,14 @@ public class UserController {
      *
      * <p>유저 정보를 조회.</p>
      *
-     * @param email 이메일
+     * @param user 유저 정보
+     *
      * @return 유저 정보를 포함하는 BaseResponse<UserInfoResponse>
      */
     @GetMapping("/info")
     @Operation(summary = "유저 정보 조회 API", description = "유저 정보를 조회합니다.")
-    public BaseResponse<UserInfoResponse> getUserInfo(@RequestParam("email") String email) {
-        return BaseResponse.of(USER_INFO_OK, userService.getUserInfo(email));
+    public BaseResponse<UserInfoResponse> getUserInfo(@AuthenticationPrincipal User user) {
+        return BaseResponse.of(USER_INFO_OK, userService.getUserInfo(user));
     }
 
     /**

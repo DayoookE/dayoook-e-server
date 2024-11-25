@@ -42,5 +42,14 @@ public class TuteeInfo implements Serializable {
 
     public void addPoint(Integer point) {
         this.point += point;
+        if(this.point >= 5000) {
+            this.level = Level.FRUIT;
+        } else if(this.point >= 2000) {
+            this.level = Level.FLOWER;
+        } else if(this.point >= 1000) {
+            this.level = Level.LEAF;
+        } else if(this.point >= 500) {
+            this.level = Level.STEM;
+        }
     }
 }

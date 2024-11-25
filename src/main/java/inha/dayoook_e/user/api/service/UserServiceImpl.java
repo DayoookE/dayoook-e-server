@@ -19,6 +19,7 @@ import inha.dayoook_e.user.api.controller.dto.response.UserInfoResponse;
 import inha.dayoook_e.user.api.mapper.UserMapper;
 import inha.dayoook_e.user.domain.User;
 import inha.dayoook_e.user.domain.UserLanguage;
+import inha.dayoook_e.user.domain.enums.Role;
 import inha.dayoook_e.user.domain.repository.UserJpaRepository;
 import inha.dayoook_e.user.domain.repository.UserLanguageJpaRepository;
 import inha.dayoook_e.utils.s3.S3Provider;
@@ -35,6 +36,7 @@ import java.util.List;
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.common.Constant.PROFILE_IMAGE_DIR;
 import static inha.dayoook_e.common.code.status.ErrorStatus.NOT_FIND_USER;
+import static inha.dayoook_e.user.domain.enums.Role.*;
 
 /**
  * UserServiceImpl은 유저 관련 비즈니스 로직을 처리하는 서비스 클래스.
@@ -134,16 +136,21 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 유저 정보 조회
+     * 사용자 정보 조회
      *
-     * @param email 이메일
-     * @return 유저 정보 응답
+     * @param user 사용자 정보
+     * @return 사용자 정보 응답
      */
     @Override
-    public UserInfoResponse getUserInfo(String email) {
-        User user = userJpaRepository.findByEmailAndState(email, ACTIVE)
-                .orElseThrow(() -> new BaseException(NOT_FIND_USER));
-        return userMapper.userToUserInfoResponse(user);
+    public UserInfoResponse getUserInfo(User user) {
+        if(user.getRole().equals(TUTEE)) {
+            TuteeInfo tuteeInfo = tuteeInfoJpaRepository.findByuserId(user.getId())
+                    .orElseThrow(() -> new BaseException(NOT_FIND_USER));
+            return userMapper.userToTuteeInfoResponse(user, tuteeInfo);
+        }
+        else {
+            return userMapper.userToTutorInfoResponse(user);
+        }
     }
 
 
