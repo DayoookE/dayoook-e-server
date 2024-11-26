@@ -4,11 +4,12 @@ import inha.dayoook_e.application.api.controller.dto.request.ApplyRequest;
 import inha.dayoook_e.application.api.controller.dto.request.TimeSlotRequest;
 import inha.dayoook_e.application.api.controller.dto.response.ApplicationResponse;
 import inha.dayoook_e.application.api.mapper.ApplicationMapper;
+import inha.dayoook_e.application.domain.Application;
 import inha.dayoook_e.application.domain.ApplicationGroup;
 import inha.dayoook_e.application.domain.enums.Status;
 import inha.dayoook_e.application.domain.repository.ApplicationGroupJpaRepository;
+import inha.dayoook_e.application.domain.repository.ApplicationJpaRepository;
 import inha.dayoook_e.common.exceptions.BaseException;
-import inha.dayoook_e.application.domain.Application;
 import inha.dayoook_e.course.api.controller.dto.request.CreateCourseRequest;
 import inha.dayoook_e.course.api.controller.dto.response.CourseResponse;
 import inha.dayoook_e.course.api.mapper.CourseMapper;
@@ -19,7 +20,6 @@ import inha.dayoook_e.mapping.domain.repository.DayJpaRepository;
 import inha.dayoook_e.mapping.domain.repository.TimeSlotJpaRepository;
 import inha.dayoook_e.tutor.api.mapper.TutorScheduleMapper;
 import inha.dayoook_e.tutor.domain.TutorSchedule;
-import inha.dayoook_e.application.domain.repository.ApplicationJpaRepository;
 import inha.dayoook_e.tutor.domain.id.TutorScheduleId;
 import inha.dayoook_e.tutor.domain.repository.TutorScheduleJpaRepository;
 import inha.dayoook_e.user.domain.User;
@@ -37,7 +37,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static inha.dayoook_e.application.domain.enums.Status.*;
+import static inha.dayoook_e.application.domain.enums.Status.APPLYING;
+import static inha.dayoook_e.application.domain.enums.Status.APPROVED;
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.common.code.status.ErrorStatus.*;
 
@@ -210,9 +211,25 @@ public class ApplicationServiceImpl implements ApplicationService{
             }
         }
 
-        // 6. 모든 검증이 통과되면, 각 Application에 대해 처리
+        // 6. 승인되는 시간대와 겹치는 다른 신청들 찾아서 거절 처리
+        List<ApplicationGroup> conflictingApplicationGroups = findConflictingApplicationGroups(
+                applicationGroup.getApplications(),
+                tutor
+        );
+
+        for (ApplicationGroup conflictGroup : conflictingApplicationGroups) {
+            // 현재 승인하는 그룹과 다른 그룹들은 거절 처리
+            if (!conflictGroup.getId().equals(applicationGroupId)) {
+                for (Application application : conflictGroup.getApplications()) {
+                    application.changeStatus(Status.REJECTED);
+                }
+                conflictGroup.changeStatus(Status.REJECTED);
+            }
+        }
+
+        // 7. 현재 승인하는 ApplicationGroup 처리
         for (Application application : applicationGroup.getApplications()) {
-            // 6.1. TutorSchedule 업데이트
+            // 7.1. TutorSchedule 업데이트
             TutorScheduleId scheduleId = new TutorScheduleId(
                     tutor.getId(),
                     application.getDay().getId(),
@@ -221,19 +238,19 @@ public class ApplicationServiceImpl implements ApplicationService{
             TutorSchedule tutorSchedule = tutorScheduleJpaRepository.findById(scheduleId).get();
             tutorSchedule.makeUnavailable();
 
-            // 6.2. Course 생성
+            // 7.2. Course 생성
             CreateCourseRequest createCourseRequest = courseMapper.toCreateCourseRequest(application);
             CourseResponse courseResponse = courseService.createCourse(createCourseRequest);
             log.info("Course 생성 성공, Course ID : {}", courseResponse.id());
 
-            // 6.3. Application 상태 변경
+            // 7.3. Application 상태 변경
             application.changeStatus(APPROVED);
         }
 
-        // 7. ApplicationGroup 상태 변경
+        // 8. ApplicationGroup 상태 변경
         applicationGroup.changeStatus(APPROVED);
 
-        // 8. 결과 반환
+        // 9. 결과 반환
         return applicationMapper.toApplicationResponse(applicationGroup);
     }
 
@@ -275,6 +292,79 @@ public class ApplicationServiceImpl implements ApplicationService{
 
         // 7. 결과 반환
         return applicationMapper.toApplicationResponse(applicationGroup);
+    }
+
+    /**
+     * 강의 신청 취소
+     *
+     * @param user 로그인 한 튜티
+     * @param applicationGroupId 취소할 신청 그룹 id
+     * @return 신청 취소 결과
+     */
+    @Override
+    public ApplicationResponse cancelApplication(User user, Integer applicationGroupId) {
+        // 1. ApplicationGroup 조회
+        ApplicationGroup applicationGroup = applicationGroupJpaRepository.findById(applicationGroupId)
+                .orElseThrow(() -> new BaseException(APPLICATION_GROUP_NOT_FOUND));
+
+        // 2. ApplicationGroup의 신청자와 로그인한 사용자가 일치하는지 확인
+        if (!applicationGroup.getTutee().getId().equals(user.getId())) {
+            throw new BaseException(INVALID_ROLE);
+        }
+
+        // 3. ApplicationGroup의 상태가 APPLYING인지 확인
+        if (!applicationGroup.getStatus().equals(APPLYING)) {
+            throw new BaseException(INVALID_APPLICATION_STATUS);
+        }
+
+        // 4. 모든 Application의 상태를 CANCELED로 변경
+        for (Application application : applicationGroup.getApplications()) {
+            application.changeStatus(Status.CANCELED);
+        }
+
+        // 5. ApplicationGroup 상태 변경
+        applicationGroup.changeStatus(Status.CANCELED);
+
+        // 6. 결과 반환
+        return applicationMapper.toApplicationResponse(applicationGroup);
+    }
+
+    /**
+     * 현재 승인하려는 애플리케이션과 시간대가 겹치는 모든 애플리케이션 그룹 찾기
+     *
+     * @param currentApplications 현재 승인하려는 애플리케이션들
+     * @param tutor 현재 승인하는 튜터
+     * @return 시간대가 겹치는 애플리케이션 그룹들
+     */
+    private List<ApplicationGroup> findConflictingApplicationGroups(
+            List<Application> currentApplications,
+            User tutor
+    ) {
+        // 현재 승인 대기 중이거나 이미 승인된 애플리케이션들 조회
+        List<ApplicationGroup> conflictGroups = new ArrayList<>();
+        List<Application> allActiveApplications = applicationJpaRepository.findAll().stream()
+                .filter(app ->
+                        (app.getApplicationGroup().getStatus() == APPLYING ||
+                                app.getApplicationGroup().getStatus() == APPROVED)
+                )
+                .collect(Collectors.toList());
+
+        for (Application currentApp : currentApplications) {
+            // 현재 승인하려는 각 시간대에 대해 겹치는 다른 애플리케이션 그룹 찾기
+            List<ApplicationGroup> groupsWithConflictingTimeSlot = allActiveApplications.stream()
+                    .filter(app ->
+                            !app.getTutor().getId().equals(tutor.getId()) && // 현재 승인하는 튜터 제외
+                                    app.getDay().getId().equals(currentApp.getDay().getId()) &&
+                                    app.getTimeSlot().getId().equals(currentApp.getTimeSlot().getId())
+                    )
+                    .map(Application::getApplicationGroup)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            conflictGroups.addAll(groupsWithConflictingTimeSlot);
+        }
+
+        return conflictGroups;
     }
 
     /**

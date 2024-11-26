@@ -31,10 +31,12 @@ public enum SuccessStatus implements BaseCode {
     TUTOR_SEARCH_PAGE_OK(HttpStatus.OK, "TUTOR2001", "튜터 조건 검색 성공"),
     TUTOR_SCHEDULE_CREATE_OK(HttpStatus.CREATED, "TUTOR2002", "튜터 일정 생성 성공"),
     TUTOR_SCHEDULE_SEARCH_OK(HttpStatus.OK, "TUTOR2003", "튜터 일정 조회 성공"),
+    TUTOR_APPLICATION_SEARCH_OK(HttpStatus.OK, "TUTOR2004", "튜터 신청 목록 조회 성공"),
 
     APPLICATION_CREATE_OK(HttpStatus.CREATED, "APPLICATION2000", "신청 생성 성공"),
     APPLICATION_APPROVE_OK(HttpStatus.CREATED, "APPLICATION2001", "신청 승인 성공"),
     APPLICATION_REJECT_OK(HttpStatus.CREATED, "APPLICATION2002", "신청 거절 성공"),
+    APPLICATION_CANCEL_OK(HttpStatus.CREATED, "APPLICATION2003", "신청 취소 성공"),
 
 
     STORYBOOK_CREATE_OK(HttpStatus.CREATED, "STORYBOOK2000", "동화 생성 성공"),

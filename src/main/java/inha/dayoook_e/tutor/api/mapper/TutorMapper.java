@@ -1,17 +1,20 @@
 package inha.dayoook_e.tutor.api.mapper;
 
+import inha.dayoook_e.application.domain.ApplicationGroup;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchAgeGroupResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchDayResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchTimeSlotResponse;
 import inha.dayoook_e.mapping.domain.Day;
 import inha.dayoook_e.mapping.domain.TimeSlot;
+import inha.dayoook_e.tutor.api.controller.dto.request.ScheduleTimeSlot;
 import inha.dayoook_e.tutor.api.controller.dto.response.*;
 import inha.dayoook_e.tutor.domain.Experience;
 import inha.dayoook_e.tutor.domain.TutorInfo;
 import inha.dayoook_e.tutor.domain.TutorSchedule;
 import inha.dayoook_e.tutor.domain.id.TutorScheduleId;
 import inha.dayoook_e.user.api.controller.dto.request.TutorSignupRequest;
+import inha.dayoook_e.user.api.controller.dto.response.TuteeInfoResponse;
 import inha.dayoook_e.user.domain.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -131,4 +134,20 @@ public interface TutorMapper {
      * @return 튜터 일정 조회 응답 Dto 리스트
      */
     SearchTutorScheduleResponse toSearchTutorScheduleResponse(User user, List<TutorScheduleData> tutorScheduleDataList);
+
+    /**
+     * 튜터 신청 조회 응답 Dto 생성
+     *
+     * @param applicationGroup 신청 그룹
+     * @param tuteeInfo 튜티 정보
+     * @param languages 튜터 언어 리스트
+     * @param scheduleTimeSlots 튜터 일정 리스트
+     * @return 튜터 신청 조회 응답 Dto
+     */
+
+    @Mapping(target = "id", source = "applicationGroup.id")
+    @Mapping(target = "createdAt", source = "applicationGroup.createdAt")
+    @Mapping(target = "status", source = "applicationGroup.status")
+    @Mapping(target = "message", source = "applicationGroup.message")
+    SearchTutorApplicationResponse toSearchTutorApplicationResponse(ApplicationGroup applicationGroup, TuteeInfoResponse tuteeInfo, List<SearchLanguagesResponse> languages, List<ScheduleTimeSlot> scheduleTimeSlots);
 }
