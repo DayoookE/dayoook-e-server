@@ -9,4 +9,5 @@ public interface ApplicationService {
     ApplicationResponse apply(User user, ApplyRequest applyRequest);
     ApplicationResponse approveApplication(User tutor, Integer applicationGroupId);
     ApplicationResponse rejectApplication(User user, Integer applicationGroupId);
+    ApplicationResponse cancelApplication(User user, Integer applicationGroupId);
 }

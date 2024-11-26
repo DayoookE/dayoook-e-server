@@ -1,6 +1,7 @@
 package inha.dayoook_e.mapping.api.mapper;
 
 import inha.dayoook_e.mapping.api.controller.dto.response.*;
+import inha.dayoook_e.tutor.api.controller.dto.request.ScheduleTimeSlot;
 import inha.dayoook_e.tutor.domain.TutorAgeGroup;
 import inha.dayoook_e.user.domain.Point;
 import inha.dayoook_e.user.domain.User;
@@ -97,4 +98,14 @@ public interface MappingMapper {
     @Mapping(source = "userLanguage.language.id", target = "id")
     @Mapping(source = "userLanguage.language.name", target = "name")
     SearchLanguagesResponse userLanguageToSearchLanguageResponse(UserLanguage userLanguage);
+
+    /**
+     * ScheduleTimeSlot을 ScheduleTimeSlot으로 변환
+     *
+     * @param dayId 요일 ID
+     * @param timeSlotId 시간대 ID
+     * @return ScheduleTimeSlot
+     */
+    ScheduleTimeSlot toScheduleTimeSlot(Integer dayId, Integer timeSlotId);
+
 }

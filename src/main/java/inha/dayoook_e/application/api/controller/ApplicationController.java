@@ -67,4 +67,17 @@ public class ApplicationController {
         return BaseResponse.of(APPLICATION_REJECT_OK, applicationService.rejectApplication(user, applicationGroupId));
     }
 
+    /**
+     * 강의 신청 취소 api
+     * @param user 로그인 한 튜티
+     * @param applicationGroupId 취소할 신청 그룹 ID
+     * @return 강의 신청 취소 결과
+     */
+    @PostMapping("/{applicationGroupId}/cancel")
+    @Operation(summary = "강의 신청 취소 API", description = "튜티가 강의 신청을 취소합니다.")
+    public BaseResponse<ApplicationResponse> cancelApplication(@AuthenticationPrincipal User user,
+                                                   @PathVariable("applicationGroupId") Integer applicationGroupId) {
+        return BaseResponse.of(APPLICATION_CANCEL_OK, applicationService.cancelApplication(user, applicationGroupId));
+    }
+
 }

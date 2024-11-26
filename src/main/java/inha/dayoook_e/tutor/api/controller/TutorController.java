@@ -1,19 +1,18 @@
 package inha.dayoook_e.tutor.api.controller;
 
+import inha.dayoook_e.application.domain.enums.Status;
 import inha.dayoook_e.common.BaseResponse;
 import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.tutor.api.controller.dto.request.SearchCond;
 import inha.dayoook_e.tutor.api.controller.dto.request.TutorScheduleRequest;
-import inha.dayoook_e.tutor.api.controller.dto.response.SearchTutorScheduleResponse;
-import inha.dayoook_e.tutor.api.controller.dto.response.TutorResponse;
-import inha.dayoook_e.tutor.api.controller.dto.response.TutorSearchPageResponse;
-import inha.dayoook_e.tutor.api.controller.dto.response.TutorSearchResponse;
+import inha.dayoook_e.tutor.api.controller.dto.response.*;
 import inha.dayoook_e.tutor.api.service.TutorService;
 import inha.dayoook_e.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -77,6 +76,18 @@ public class TutorController {
     public BaseResponse<SearchTutorScheduleResponse> getTutorSchedule(@AuthenticationPrincipal User user,
                                                                       @PathVariable("tutorId") Integer tutorId) {
         return BaseResponse.of(TUTOR_SCHEDULE_SEARCH_OK, tutorService.getTutorSchedule(user, tutorId));
+    }
+
+    @GetMapping("/application/{tutorId}")
+    @Operation(summary = "튜터 신청 조회 API", description = "튜터 신청을 조회합니다.")
+    public BaseResponse<Page<SearchTutorApplicationResponse>> getTutorApplication(@AuthenticationPrincipal User user,
+                                                                                  @PathVariable("tutorId") Integer tutorId,
+                                                                                  @RequestParam("page") Integer page,
+                                                                                  @RequestParam(value = "status", required = false) Status status) {
+        if (page < 1) {
+            throw new BaseException(INVALID_PAGE);
+        }
+        return BaseResponse.of(TUTOR_APPLICATION_SEARCH_OK, tutorService.getTutorApplication(user, tutorId, page - 1, status));
     }
 
     /**

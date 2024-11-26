@@ -1,5 +1,10 @@
 package inha.dayoook_e.tutor.api.service;
 
+import inha.dayoook_e.application.domain.Application;
+import inha.dayoook_e.application.domain.ApplicationGroup;
+import inha.dayoook_e.application.domain.enums.Status;
+import inha.dayoook_e.application.domain.repository.ApplicationGroupJpaRepository;
+import inha.dayoook_e.application.domain.repository.ApplicationJpaRepository;
 import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchAgeGroupResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchDayResponse;
@@ -20,8 +25,11 @@ import inha.dayoook_e.tutor.domain.TutorAgeGroup;
 import inha.dayoook_e.tutor.domain.TutorInfo;
 import inha.dayoook_e.tutor.domain.TutorSchedule;
 import inha.dayoook_e.tutor.domain.id.TutorScheduleId;
-import inha.dayoook_e.tutor.domain.repository.*;
-import inha.dayoook_e.user.api.mapper.UserMapper;
+import inha.dayoook_e.tutor.domain.repository.ExperienceJpaRepository;
+import inha.dayoook_e.tutor.domain.repository.TutorAgeGroupJpaRepository;
+import inha.dayoook_e.tutor.domain.repository.TutorQueryRepository;
+import inha.dayoook_e.tutor.domain.repository.TutorScheduleJpaRepository;
+import inha.dayoook_e.user.api.controller.dto.response.TuteeInfoResponse;
 import inha.dayoook_e.user.domain.User;
 import inha.dayoook_e.user.domain.UserLanguage;
 import inha.dayoook_e.user.domain.enums.Role;
@@ -29,17 +37,18 @@ import inha.dayoook_e.user.domain.repository.UserJpaRepository;
 import inha.dayoook_e.user.domain.repository.UserLanguageJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
+import static inha.dayoook_e.common.Constant.CREATE_AT;
 import static inha.dayoook_e.common.Constant.NAME;
 import static inha.dayoook_e.common.code.status.ErrorStatus.*;
 import static inha.dayoook_e.user.domain.enums.Role.TUTOR;
@@ -58,7 +67,9 @@ public class TutorServiceImpl implements TutorService {
     private final TutorAgeGroupJpaRepository tutorAgeGroupJpaRepository;
     private final UserLanguageJpaRepository userLanguageJpaRepository;
     private final TutorQueryRepository tutorQueryRepository;
+    private final ApplicationJpaRepository applicationJpaRepository;
     private final UserJpaRepository userJpaRepository;
+    private final ApplicationGroupJpaRepository applicationGroupJpaRepository;
     private final TutorMapper tutorMapper;
     private final TutorScheduleJpaRepository tutorScheduleJpaRepository;
     private final DayJpaRepository dayJpaRepository;
@@ -121,8 +132,6 @@ public class TutorServiceImpl implements TutorService {
         List<SearchExperienceResponse> searchExperienceResponses = experienceList.stream().map(
                 experience -> tutorMapper.toSearchExperienceResponse(experience)
         ).toList();
-
-
         return tutorMapper.toTutorSearchResponse(tutor, tutorInfo, searchLanguagesResponses, searchAgeGroupResponses, searchExperienceResponses);
     }
 
@@ -133,6 +142,7 @@ public class TutorServiceImpl implements TutorService {
      * @param tutorScheduleRequest 튜터 일정 생성 요청
      * @return TutorResponse
      */
+    @Override
     public TutorResponse createSchedule(User user, TutorScheduleRequest tutorScheduleRequest) {
         // 1. Role이 TUTOR인지 확인
         if (!user.getRole().equals(TUTOR)) {
@@ -171,12 +181,35 @@ public class TutorServiceImpl implements TutorService {
         // 6-1. 기존 스케줄 순회하면서 처리
         for (TutorSchedule existingSchedule : allExistingSchedules) {
             boolean isRequestedNow = requestedScheduleIds.contains(existingSchedule.getId());
-            if (Boolean.TRUE.equals(existingSchedule.getIsAvailable()) && !isRequestedNow) {
-                existingSchedule.makeUnavailable();
-                schedulesToUpdate.add(existingSchedule);
-            } else if (Boolean.TRUE.equals(!existingSchedule.getIsAvailable()) && isRequestedNow) {
-                existingSchedule.makeAvailable();
-                schedulesToUpdate.add(existingSchedule);
+
+            // 중요: 승인된 강의 시간대는 기본적으로 unavailable로 유지
+            List<Application> approvedApplications = applicationJpaRepository.findAll().stream()
+                    .filter(app ->
+                            app.getTutor().getId().equals(user.getId()) &&
+                                    app.getDay().getId().equals(existingSchedule.getDay().getId()) &&
+                                    app.getTimeSlot().getId().equals(existingSchedule.getTimeSlot().getId()) &&
+                                    app.getApplicationGroup().getStatus().equals(Status.APPROVED)
+                    )
+                    .collect(Collectors.toList());
+
+            boolean hasApprovedApplications = !approvedApplications.isEmpty();
+
+            // 로직 조건 변경
+            if (hasApprovedApplications) {
+                // 승인된 강의가 있는 시간대는 무조건 unavailable
+                if (existingSchedule.getIsAvailable()) {
+                    existingSchedule.makeUnavailable();
+                    schedulesToUpdate.add(existingSchedule);
+                }
+            } else {
+                // 승인된 강의가 없는 경우에만 기존 로직 적용
+                if (Boolean.TRUE.equals(existingSchedule.getIsAvailable()) && !isRequestedNow) {
+                    existingSchedule.makeUnavailable();
+                    schedulesToUpdate.add(existingSchedule);
+                } else if (Boolean.TRUE.equals(!existingSchedule.getIsAvailable()) && isRequestedNow) {
+                    existingSchedule.makeAvailable();
+                    schedulesToUpdate.add(existingSchedule);
+                }
             }
 
             // 처리된 ID는 요청 목록에서 제거
@@ -203,6 +236,7 @@ public class TutorServiceImpl implements TutorService {
         // 9. 응답 생성
         return tutorMapper.toTutorResponse(user);
     }
+
 
 
     /**
@@ -254,6 +288,58 @@ public class TutorServiceImpl implements TutorService {
         }
         // 6. 최종 응답 생성
         return tutorMapper.toSearchTutorScheduleResponse(tutor, scheduleDataList);
+    }
+
+    @Override
+    public Page<SearchTutorApplicationResponse> getTutorApplication(User user, Integer tutorId, Integer page, Status status) {
+        // 1. 페이징 설정 (최근 신청 순으로 정렬)
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, CREATE_AT));
+
+        // 2. 튜터 존재 여부 확인
+        User tutor = userJpaRepository.findByIdAndState(tutorId, ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_FIND_USER));
+
+        // 3. 권한 검증 (튜터 자신 또는 관리자만 조회 가능)
+        if (!user.getId().equals(tutorId) && !user.getRole().equals(Role.ADMIN)) {
+            throw new BaseException(INVALID_ROLE);
+        }
+
+        // 4. 신청 그룹 조회 (특정 상태의 신청 그룹만 조회)
+        Page<ApplicationGroup> applicationGroups;
+        if (status == null) {
+            applicationGroups = applicationGroupJpaRepository.findByTutor(tutor, pageable);
+        } else {
+            applicationGroups = applicationGroupJpaRepository.findByTutorAndStatus(tutor, status, pageable);
+        }
+
+        // 5. DTO 변환
+        return applicationGroups.map(applicationGroup -> {
+            // 튜티 기본 정보 변환
+            TuteeInfoResponse tuteeInfo = TuteeInfoResponse.builder()
+                    .id(applicationGroup.getTutee().getId())
+                    .role(applicationGroup.getTutee().getRole())
+                    .name(applicationGroup.getTutee().getName())
+                    .profileUrl(applicationGroup.getTutee().getProfileUrl())
+                    .gender(applicationGroup.getTutee().getGender())
+                    .age(applicationGroup.getTutee().getAge())
+                    .point(applicationGroup.getTutee().getTuteeInfo().getPoint())
+                    .level(applicationGroup.getTutee().getTuteeInfo().getLevel())
+                    .build();
+
+            // 튜티 언어 정보 변환
+            List<SearchLanguagesResponse> languages = applicationGroup.getTutee().getUserLanguages().stream()
+                    .map(userLanguage -> mappingMapper.toSearchLanguagesResponse(userLanguage.getLanguage().getId(), userLanguage.getLanguage().getName()))
+                    .toList();
+
+            // 신청 시간대 정보 변환
+            List<ScheduleTimeSlot> scheduleTimeSlots = applicationGroup.getApplications().stream()
+                    .map(application -> mappingMapper.toScheduleTimeSlot(application.getDay().getId(), application.getTimeSlot().getId()
+                    ))
+                    .toList();
+
+            // SearchTutorApplicationResponse 생성
+            return tutorMapper.toSearchTutorApplicationResponse(applicationGroup, tuteeInfo, languages, scheduleTimeSlots);
+        });
     }
 
     private void validateRequestedIds(
