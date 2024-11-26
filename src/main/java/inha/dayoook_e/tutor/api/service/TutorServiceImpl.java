@@ -1,5 +1,8 @@
 package inha.dayoook_e.tutor.api.service;
 
+import inha.dayoook_e.application.domain.Application;
+import inha.dayoook_e.application.domain.enums.Status;
+import inha.dayoook_e.application.domain.repository.ApplicationJpaRepository;
 import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchAgeGroupResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchDayResponse;
@@ -20,8 +23,10 @@ import inha.dayoook_e.tutor.domain.TutorAgeGroup;
 import inha.dayoook_e.tutor.domain.TutorInfo;
 import inha.dayoook_e.tutor.domain.TutorSchedule;
 import inha.dayoook_e.tutor.domain.id.TutorScheduleId;
-import inha.dayoook_e.tutor.domain.repository.*;
-import inha.dayoook_e.user.api.mapper.UserMapper;
+import inha.dayoook_e.tutor.domain.repository.ExperienceJpaRepository;
+import inha.dayoook_e.tutor.domain.repository.TutorAgeGroupJpaRepository;
+import inha.dayoook_e.tutor.domain.repository.TutorQueryRepository;
+import inha.dayoook_e.tutor.domain.repository.TutorScheduleJpaRepository;
 import inha.dayoook_e.user.domain.User;
 import inha.dayoook_e.user.domain.UserLanguage;
 import inha.dayoook_e.user.domain.enums.Role;
@@ -36,7 +41,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
@@ -58,6 +66,7 @@ public class TutorServiceImpl implements TutorService {
     private final TutorAgeGroupJpaRepository tutorAgeGroupJpaRepository;
     private final UserLanguageJpaRepository userLanguageJpaRepository;
     private final TutorQueryRepository tutorQueryRepository;
+    private final ApplicationJpaRepository applicationJpaRepository;
     private final UserJpaRepository userJpaRepository;
     private final TutorMapper tutorMapper;
     private final TutorScheduleJpaRepository tutorScheduleJpaRepository;
@@ -133,6 +142,7 @@ public class TutorServiceImpl implements TutorService {
      * @param tutorScheduleRequest 튜터 일정 생성 요청
      * @return TutorResponse
      */
+    @Override
     public TutorResponse createSchedule(User user, TutorScheduleRequest tutorScheduleRequest) {
         // 1. Role이 TUTOR인지 확인
         if (!user.getRole().equals(TUTOR)) {
@@ -171,12 +181,35 @@ public class TutorServiceImpl implements TutorService {
         // 6-1. 기존 스케줄 순회하면서 처리
         for (TutorSchedule existingSchedule : allExistingSchedules) {
             boolean isRequestedNow = requestedScheduleIds.contains(existingSchedule.getId());
-            if (Boolean.TRUE.equals(existingSchedule.getIsAvailable()) && !isRequestedNow) {
-                existingSchedule.makeUnavailable();
-                schedulesToUpdate.add(existingSchedule);
-            } else if (Boolean.TRUE.equals(!existingSchedule.getIsAvailable()) && isRequestedNow) {
-                existingSchedule.makeAvailable();
-                schedulesToUpdate.add(existingSchedule);
+
+            // 중요: 승인된 강의 시간대는 기본적으로 unavailable로 유지
+            List<Application> approvedApplications = applicationJpaRepository.findAll().stream()
+                    .filter(app ->
+                            app.getTutor().getId().equals(user.getId()) &&
+                                    app.getDay().getId().equals(existingSchedule.getDay().getId()) &&
+                                    app.getTimeSlot().getId().equals(existingSchedule.getTimeSlot().getId()) &&
+                                    app.getApplicationGroup().getStatus().equals(Status.APPROVED)
+                    )
+                    .collect(Collectors.toList());
+
+            boolean hasApprovedApplications = !approvedApplications.isEmpty();
+
+            // 로직 조건 변경
+            if (hasApprovedApplications) {
+                // 승인된 강의가 있는 시간대는 무조건 unavailable
+                if (existingSchedule.getIsAvailable()) {
+                    existingSchedule.makeUnavailable();
+                    schedulesToUpdate.add(existingSchedule);
+                }
+            } else {
+                // 승인된 강의가 없는 경우에만 기존 로직 적용
+                if (Boolean.TRUE.equals(existingSchedule.getIsAvailable()) && !isRequestedNow) {
+                    existingSchedule.makeUnavailable();
+                    schedulesToUpdate.add(existingSchedule);
+                } else if (Boolean.TRUE.equals(!existingSchedule.getIsAvailable()) && isRequestedNow) {
+                    existingSchedule.makeAvailable();
+                    schedulesToUpdate.add(existingSchedule);
+                }
             }
 
             // 처리된 ID는 요청 목록에서 제거
@@ -203,6 +236,7 @@ public class TutorServiceImpl implements TutorService {
         // 9. 응답 생성
         return tutorMapper.toTutorResponse(user);
     }
+
 
 
     /**

@@ -13,7 +13,6 @@ import inha.dayoook_e.course.api.controller.dto.request.CreateCourseRequest;
 import inha.dayoook_e.course.api.controller.dto.response.CourseResponse;
 import inha.dayoook_e.course.api.mapper.CourseMapper;
 import inha.dayoook_e.course.api.service.CourseService;
-import inha.dayoook_e.course.domain.Course;
 import inha.dayoook_e.mapping.domain.Day;
 import inha.dayoook_e.mapping.domain.TimeSlot;
 import inha.dayoook_e.mapping.domain.repository.DayJpaRepository;
