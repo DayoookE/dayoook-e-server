@@ -12,4 +12,6 @@ import java.util.List;
  */
 public interface ApplicationJpaRepository extends JpaRepository<Application, Integer> {
     List<Application> findByTuteeAndTutor(User tutee, User tutor);
+
+    List<Application> findByTuteeAndStatusIn(User tutee, List<Status> applying);
 }

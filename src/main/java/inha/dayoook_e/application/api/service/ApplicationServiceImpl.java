@@ -96,17 +96,15 @@ public class ApplicationServiceImpl implements ApplicationService{
         // 5. 요청된 모든 요일과 시간대가 존재하는지 검증
         validateRequestedIds(requestedDayIds, dayMap.keySet(), requestedTimeSlotIds, timeSlotMap.keySet());
 
-        // 6. 기존 신청 내역 조회 및 중복 검증
-        List<Application> existingApplications = applicationJpaRepository.findByTuteeAndTutor(tutee, tutor)
-                .stream()
-                .filter(app -> app.getApplicationGroup().getStatus().equals(APPLYING) || app.getApplicationGroup().getStatus().equals(APPROVED))
-                .toList();
+        // 6. 시간대 중복 및 신청 중복 검증
+        List<Application> allActiveApplications = applicationJpaRepository.findAll().stream()
+                .filter(app ->
+                        (app.getApplicationGroup().getStatus() == APPLYING ||
+                                app.getApplicationGroup().getStatus() == APPROVED)
+                )
+                .collect(Collectors.toList());
 
-        if (!existingApplications.isEmpty()) {
-            throw new BaseException(DUPLICATE_APPLICATION);
-        }
-
-        validateNoDuplicateApplications(existingApplications, applyRequest.timeSlots(), dayMap, timeSlotMap);
+        validateNoDuplicateApplications(tutee, tutor, applyRequest.timeSlots(), allActiveApplications, dayMap, timeSlotMap);
 
         // 7. 요청된 모든 시간대에 대한 TutorSchedule 조회 또는 생성
         List<TutorSchedule> tutorSchedules = new ArrayList<>();
@@ -281,33 +279,67 @@ public class ApplicationServiceImpl implements ApplicationService{
     }
 
     /**
-     * 기존 신청 내역 중 중복 신청 검증
+     * 중복 신청 검증 메서드
      *
-     * @param existingApplications 기존 신청 내역
+     * @param tutee 신청자
+     * @param tutor 튜터
      * @param timeSlotRequests 요청된 시간대들
+     * @param allActiveApplications 활성화된 모든 신청 내역
      * @param dayMap 요일 정보
      * @param timeSlotMap 시간대 정보
      */
     private void validateNoDuplicateApplications(
-            List<Application> existingApplications,
+            User tutee,
+            User tutor,
             List<TimeSlotRequest> timeSlotRequests,
+            List<Application> allActiveApplications,
             Map<Integer, Day> dayMap,
             Map<Integer, TimeSlot> timeSlotMap
     ) {
+        // 동일 튜터에게 이미 승인/신청 중인 같은 시간대 신청 확인
         for (TimeSlotRequest request : timeSlotRequests) {
             Day day = dayMap.get(request.dayId());
             TimeSlot timeSlot = timeSlotMap.get(request.timeSlotId());
 
-            boolean isDuplicate = existingApplications.stream()
+            // 동일 튜터의 같은 시간대 신청 확인
+            boolean isDuplicateForTutor = allActiveApplications.stream()
+                    .anyMatch(app ->
+                            app.getTutor().getId().equals(tutor.getId()) &&
+                                    app.getDay().equals(day) &&
+                                    app.getTimeSlot().equals(timeSlot) &&
+                                    (app.getApplicationGroup().getStatus() == APPLYING ||
+                                            app.getApplicationGroup().getStatus() == APPROVED)
+                    );
+
+            if (isDuplicateForTutor) {
+                throw new BaseException(DUPLICATE_TIMESLOT);
+            }
+
+            // 기존에 신청/승인된 다른 튜터의 같은 시간대 신청 확인
+            boolean isDuplicateAcrossTutors = allActiveApplications.stream()
                     .anyMatch(app ->
                             app.getDay().equals(day) &&
                                     app.getTimeSlot().equals(timeSlot) &&
-                                    app.getApplicationGroup().getStatus() == APPLYING
+                                    (app.getApplicationGroup().getStatus() == APPLYING ||
+                                            app.getApplicationGroup().getStatus() == APPROVED)
                     );
 
-            if (isDuplicate) {
-                throw new BaseException(DUPLICATE_APPLICATION);
+            if (isDuplicateAcrossTutors) {
+                throw new BaseException(TIMESLOT_ALREADY_BOOKED);
             }
+        }
+
+        // 동일 튜터에 대한 재신청 확인
+        boolean isDuplicateApplicationGroup = allActiveApplications.stream()
+                .anyMatch(app ->
+                        app.getTutor().getId().equals(tutor.getId()) &&
+                                app.getTutee().getId().equals(tutee.getId()) &&
+                                (app.getApplicationGroup().getStatus() == APPLYING ||
+                                        app.getApplicationGroup().getStatus() == APPROVED)
+                );
+
+        if (isDuplicateApplicationGroup) {
+            throw new BaseException(DUPLICATE_APPLICATION);
         }
     }
 
