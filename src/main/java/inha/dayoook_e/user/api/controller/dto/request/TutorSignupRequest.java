@@ -4,6 +4,7 @@ import inha.dayoook_e.common.validation.annotation.EmailUnique;
 import inha.dayoook_e.common.validation.annotation.ValidEmail;
 import inha.dayoook_e.common.validation.annotation.ValidParameter;
 import inha.dayoook_e.common.validation.annotation.ValidPassword;
+import inha.dayoook_e.user.domain.enums.KoreanLevel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -52,7 +53,11 @@ public record TutorSignupRequest(
         @Schema(description = "경력", example = """
             ["인하대학교 국어교육과 학사", "인하대학교 다문화교육과 석사", "인하대학교 국어교육과 교수"]
             """)
-        List<String> descriptionList
+        List<String> descriptionList,
+
+        @NotNull
+        @Schema(description = "한국어 수준", example = "BEGINNER")
+        KoreanLevel koreanLevel
 
 ) {
 }

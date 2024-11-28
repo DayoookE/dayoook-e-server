@@ -4,6 +4,7 @@ import inha.dayoook_e.common.validation.annotation.EmailUnique;
 import inha.dayoook_e.common.validation.annotation.ValidEmail;
 import inha.dayoook_e.common.validation.annotation.ValidParameter;
 import inha.dayoook_e.common.validation.annotation.ValidPassword;
+import inha.dayoook_e.user.domain.enums.KoreanLevel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -38,7 +39,11 @@ public record TuteeSignupRequest(
         Boolean gender,
 
         @Schema(description = "사용 가능한 언어", example = "[1, 2, 3]")
-        List<Integer> languageIdList
+        List<Integer> languageIdList,
+
+        @NotNull
+        @Schema(description = "한국어 수준", example = "BEGINNER")
+        KoreanLevel koreanLevel
 
 
 ) {

@@ -3,6 +3,7 @@ package inha.dayoook_e.user.domain;
 import inha.dayoook_e.common.BaseEntity;
 import inha.dayoook_e.tutee.domain.TuteeInfo;
 import inha.dayoook_e.tutor.domain.TutorInfo;
+import inha.dayoook_e.user.domain.enums.KoreanLevel;
 import inha.dayoook_e.user.domain.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -48,6 +49,10 @@ public class User extends BaseEntity implements UserDetails {
 
     @Column(name = "profile_url", length = 100)
     private String profileUrl; // 프로필 이미지 URL
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10, name = "korean_level")
+    private KoreanLevel koreanLevel; // 한국어 수준
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private TutorInfo tutorInfo;
