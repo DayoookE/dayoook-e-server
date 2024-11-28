@@ -1,6 +1,7 @@
 package inha.dayoook_e.user.api.controller.dto.response;
 
 import inha.dayoook_e.tutee.domain.enums.Level;
+import inha.dayoook_e.user.domain.enums.KoreanLevel;
 import inha.dayoook_e.user.domain.enums.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -29,7 +30,11 @@ public record TutorInfoResponse(
 
         @NotNull
         @Schema(description = "나이", example = "20")
-        Integer age
+        Integer age,
+
+        @NotNull
+        @Schema(description = "한국어 수준", example = "BEGINNER")
+        KoreanLevel koreanLevel
 
 
 
