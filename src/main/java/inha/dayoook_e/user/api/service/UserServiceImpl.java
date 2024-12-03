@@ -1,6 +1,12 @@
 package inha.dayoook_e.user.api.service;
 
+import inha.dayoook_e.application.domain.ApplicationGroup;
 import inha.dayoook_e.common.exceptions.BaseException;
+import inha.dayoook_e.lesson.domain.Lesson;
+import inha.dayoook_e.lesson.domain.LessonSchedule;
+import inha.dayoook_e.lesson.domain.enums.Status;
+import inha.dayoook_e.lesson.domain.repository.LessonJpaRepository;
+import inha.dayoook_e.lesson.domain.repository.LessonScheduleJpaRepository;
 import inha.dayoook_e.mapping.domain.Language;
 import inha.dayoook_e.mapping.domain.repository.LanguageJpaRepository;
 import inha.dayoook_e.song.domain.repository.SongJpaRepository;
@@ -15,6 +21,7 @@ import inha.dayoook_e.tutor.domain.repository.TutorInfoJpaRepository;
 import inha.dayoook_e.user.api.controller.dto.request.TuteeSignupRequest;
 import inha.dayoook_e.user.api.controller.dto.request.TutorSignupRequest;
 import inha.dayoook_e.user.api.controller.dto.response.SignupResponse;
+import inha.dayoook_e.user.api.controller.dto.response.UpcomingLessonInfo;
 import inha.dayoook_e.user.api.controller.dto.response.UserInfoResponse;
 import inha.dayoook_e.user.api.mapper.UserMapper;
 import inha.dayoook_e.user.domain.User;
@@ -31,11 +38,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.common.Constant.PROFILE_IMAGE_DIR;
 import static inha.dayoook_e.common.code.status.ErrorStatus.NOT_FIND_USER;
+import static inha.dayoook_e.lesson.domain.enums.Status.*;
 import static inha.dayoook_e.user.domain.enums.Role.*;
 
 /**
@@ -54,7 +63,9 @@ public class UserServiceImpl implements UserService {
     private final ExperienceJpaRepository experienceJpaRepository;
     private final UserLanguageJpaRepository userLanguageJpaRepository;
     private final LanguageJpaRepository languageJpaRepository;
+    private final LessonScheduleJpaRepository lessonScheduleJpaRepository;
     private final SongJpaRepository songJpaRepository;
+    private final LessonJpaRepository lessonJpaRepository;
     private final TuteeSongProgressJpaRepository tuteeSongProgressJpaRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
@@ -146,7 +157,14 @@ public class UserServiceImpl implements UserService {
         if(user.getRole().equals(TUTEE)) {
             TuteeInfo tuteeInfo = tuteeInfoJpaRepository.findByuserId(user.getId())
                     .orElseThrow(() -> new BaseException(NOT_FIND_USER));
-            return userMapper.userToTuteeInfoResponse(user, tuteeInfo);
+
+            // 출석률 계산
+            Double attendanceRate = calculateTuteeAttendanceRate(user.getId());
+
+            // 다음 예정된 수업 정보 조회
+            UpcomingLessonInfo upcomingLesson = getUpcomingLesson(user.getId());
+
+            return userMapper.userToTuteeInfoResponse(user, tuteeInfo, attendanceRate, upcomingLesson);
         }
         else {
             return userMapper.userToTutorInfoResponse(user);
@@ -162,5 +180,46 @@ public class UserServiceImpl implements UserService {
      */
     private String handleProfileImage(MultipartFile profileImage, Integer userId) {
         return s3Provider.multipartFileUpload(profileImage, new S3UploadRequest(userId, PROFILE_IMAGE_DIR));
+    }
+
+
+    private Double calculateTuteeAttendanceRate(Integer tuteeId) {
+        // 튜티의 모든 레슨 조회
+        List<Lesson> lessons = lessonJpaRepository
+                .findAllByApplicationGroup_Tutee_IdAndState(tuteeId, ACTIVE);
+
+        if (lessons.isEmpty()) {
+            return 0.0;
+        }
+
+        // 각 레슨의 출석률 계산 후 평균 내기
+        double totalAttendanceRate = lessons.stream()
+                .mapToDouble(Lesson::calculateAttendanceRate)
+                .average()
+                .orElse(0.0);
+
+        return totalAttendanceRate;
+    }
+
+    private UpcomingLessonInfo getUpcomingLesson(Integer tuteeId) {
+        // 가장 높은 ID값을 가진(=가장 최근) SCHEDULED 상태의 수업 찾기
+        LessonSchedule upcomingSchedule = lessonScheduleJpaRepository
+                .findFirstByLesson_ApplicationGroup_Tutee_IdAndStatusOrderByIdDesc(
+                        tuteeId,
+                        Status.SCHEDULED
+                ).orElse(null);
+
+        if (upcomingSchedule == null) {
+            return null;
+        }
+
+        ApplicationGroup applicationGroup = upcomingSchedule.getLesson().getApplicationGroup();
+        User tutor = applicationGroup.getTutor();
+
+        return new UpcomingLessonInfo(
+                tutor.getId(),
+                tutor.getName(),
+                upcomingSchedule.getStartAt()
+        );
     }
 }

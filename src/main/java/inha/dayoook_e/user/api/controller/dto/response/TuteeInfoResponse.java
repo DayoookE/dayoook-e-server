@@ -44,7 +44,14 @@ public record TuteeInfoResponse(
 
         @NotNull
         @Schema(description = "한국어 수준", example = "BEGINNER")
-        KoreanLevel koreanLevel
+        KoreanLevel koreanLevel,
+
+        @NotNull
+        @Schema(description = "전체 출석률", example = "85.5")
+        Double attendanceRate,
+
+        @Schema(description = "다음 예정된 수업 정보")
+        UpcomingLessonInfo upcomingLesson
 
 ) implements UserInfoResponse {
 }

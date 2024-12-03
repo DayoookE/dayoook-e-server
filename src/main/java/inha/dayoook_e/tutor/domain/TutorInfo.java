@@ -54,4 +54,8 @@ public class TutorInfo implements Serializable {
     public void setUser(User user) {
         this.user = user;
     }
+
+    public void setOccupation(String occupation) {
+        this.occupation = occupation;
+    }
 }

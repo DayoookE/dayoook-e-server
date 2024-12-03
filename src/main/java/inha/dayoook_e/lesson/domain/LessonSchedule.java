@@ -1,8 +1,7 @@
 package inha.dayoook_e.lesson.domain;
 
-import inha.dayoook_e.course.domain.Course;
+import inha.dayoook_e.common.BaseEntity;
 import inha.dayoook_e.lesson.domain.enums.Status;
-import inha.dayoook_e.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -35,12 +34,26 @@ public class LessonSchedule {
     @Column(name = "start_at", nullable = false)
     private LocalDateTime startAt; // 수업 시작 시간
 
+    @Column
+    private String reason; // 수업 취소 사유
+
     @OneToOne(mappedBy = "lessonSchedule", fetch = FetchType.LAZY)
     private MeetingRoom meetingRoom;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Course_id", nullable = false)
-    private Course course;
+    private Lesson lesson;
 
+
+    public void complete() {
+        this.attendance = Boolean.TRUE;
+        this.status = Status.COMPLETED;
+    }
+
+    public void cancel(String reason) {
+        this.attendance = Boolean.FALSE;
+        this.status = Status.CANCELED;
+        this.reason = reason;
+    }
 
 }

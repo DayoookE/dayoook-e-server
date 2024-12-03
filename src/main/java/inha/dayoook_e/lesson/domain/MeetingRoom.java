@@ -25,10 +25,11 @@ public class MeetingRoom {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt; // 회의실 생성 날짜
 
-    @Column(name = "end_at")
-    private LocalDateTime endAt; // 회의실 종료 날짜
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_schedule_id", nullable = false)
     private LessonSchedule lessonSchedule;
+
+    public void setLessonSchedule(LessonSchedule lessonSchedule) {
+        this.lessonSchedule = lessonSchedule;
+    }
 }
