@@ -1,10 +1,12 @@
 package inha.dayoook_e.lesson.api.mapper;
 
 import inha.dayoook_e.application.domain.Application;
+import inha.dayoook_e.application.domain.ApplicationGroup;
 import inha.dayoook_e.lesson.api.controller.dto.request.CreateLessonRequest;
 import inha.dayoook_e.lesson.api.controller.dto.response.LessonResponse;
 import inha.dayoook_e.lesson.domain.Lesson;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 /**
@@ -18,10 +20,7 @@ public interface LessonMapper {
      * @param application 등록할 신청 정보
      * @return createCourseRequest
      */
-    default CreateLessonRequest toCreateLessonRequest(Application application) {
-        return new CreateLessonRequest(application.getTutor().getId(), application.getTutee().getId(),
-                application.getDay().getId(), application.getTimeSlot().getId());
-    };
+    CreateLessonRequest toCreateLessonRequest(Application application);
 
     /**
      * Lesson를 LessonResponse로 변환하는 매퍼
@@ -30,5 +29,9 @@ public interface LessonMapper {
      * @return LessonResponse
      */
     LessonResponse toLessonResponse(Lesson lesson);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "applicationGroup", source = "applicationGroup")
+    Lesson toLesson(ApplicationGroup applicationGroup);
 
 }

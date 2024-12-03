@@ -237,10 +237,10 @@ public class ApplicationServiceImpl implements ApplicationService{
             TutorSchedule tutorSchedule = tutorScheduleJpaRepository.findById(scheduleId).get();
             tutorSchedule.makeUnavailable();
 
-            // 7.2. Course 생성
+            // 7.2. Lesson 생성
             CreateLessonRequest createLessonRequest = lessonMapper.toCreateLessonRequest(application);
             LessonResponse lessonResponse = lessonService.createLesson(createLessonRequest);
-            log.info("Course 생성 성공, Course ID : {}", lessonResponse.id());
+            log.info("Lesson 생성 성공, Lesson ID : {}", lessonResponse.id());
 
             // 7.3. Application 상태 변경
             application.changeStatus(APPROVED);
