@@ -1,9 +1,9 @@
-package inha.dayoook_e.course.api.controller.dto.request;
+package inha.dayoook_e.lesson.api.controller.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
-public record CreateCourseRequest(
+public record CreateLessonRequest(
         @NotNull
         @Schema(description = "튜터 id", example = "1")
         Integer tutorId,

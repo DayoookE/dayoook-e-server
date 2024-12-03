@@ -10,10 +10,10 @@ import inha.dayoook_e.application.domain.enums.Status;
 import inha.dayoook_e.application.domain.repository.ApplicationGroupJpaRepository;
 import inha.dayoook_e.application.domain.repository.ApplicationJpaRepository;
 import inha.dayoook_e.common.exceptions.BaseException;
-import inha.dayoook_e.course.api.controller.dto.request.CreateCourseRequest;
-import inha.dayoook_e.course.api.controller.dto.response.CourseResponse;
-import inha.dayoook_e.course.api.mapper.CourseMapper;
-import inha.dayoook_e.course.api.service.CourseService;
+import inha.dayoook_e.lesson.api.controller.dto.request.CreateLessonRequest;
+import inha.dayoook_e.lesson.api.controller.dto.response.LessonResponse;
+import inha.dayoook_e.lesson.api.mapper.LessonMapper;
+import inha.dayoook_e.lesson.api.service.LessonService;
 import inha.dayoook_e.mapping.domain.Day;
 import inha.dayoook_e.mapping.domain.TimeSlot;
 import inha.dayoook_e.mapping.domain.repository.DayJpaRepository;
@@ -59,9 +59,8 @@ public class ApplicationServiceImpl implements ApplicationService{
     private final UserJpaRepository userJpaRepository;
     private final ApplicationMapper applicationMapper;
     private final TutorScheduleMapper tutorScheduleMapper;
-    private final CourseService courseService;
-    private final CourseMapper courseMapper;
-
+    private final LessonMapper lessonMapper;
+    private final LessonService lessonService;
     /**
      * 강의 신청
      *
@@ -239,9 +238,9 @@ public class ApplicationServiceImpl implements ApplicationService{
             tutorSchedule.makeUnavailable();
 
             // 7.2. Course 생성
-            CreateCourseRequest createCourseRequest = courseMapper.toCreateCourseRequest(application);
-            CourseResponse courseResponse = courseService.createCourse(createCourseRequest);
-            log.info("Course 생성 성공, Course ID : {}", courseResponse.id());
+            CreateLessonRequest createLessonRequest = lessonMapper.toCreateLessonRequest(application);
+            LessonResponse lessonResponse = lessonService.createLesson(createLessonRequest);
+            log.info("Course 생성 성공, Course ID : {}", lessonResponse.id());
 
             // 7.3. Application 상태 변경
             application.changeStatus(APPROVED);

@@ -1,8 +1,6 @@
 package inha.dayoook_e.lesson.domain;
 
-import inha.dayoook_e.course.domain.Course;
 import inha.dayoook_e.lesson.domain.enums.Status;
-import inha.dayoook_e.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -40,7 +38,7 @@ public class LessonSchedule {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Course_id", nullable = false)
-    private Course course;
+    private Lesson lesson;
 
 
 }
