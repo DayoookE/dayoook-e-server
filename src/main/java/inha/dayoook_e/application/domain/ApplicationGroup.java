@@ -2,12 +2,14 @@ package inha.dayoook_e.application.domain;
 
 import inha.dayoook_e.application.domain.enums.Status;
 import inha.dayoook_e.common.BaseEntity;
+import inha.dayoook_e.lesson.domain.Lesson;
 import inha.dayoook_e.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -41,5 +43,13 @@ public class ApplicationGroup extends BaseEntity {
 
     public void changeStatus(Status status) {
         this.status = status;
+    }
+
+    @OneToOne(mappedBy = "applicationGroup", fetch = FetchType.LAZY)
+    private Lesson lesson;
+
+    // Optional을 반환하는 메서드 추가
+    public Optional<Lesson> getLesson() {
+        return Optional.ofNullable(lesson);
     }
 }

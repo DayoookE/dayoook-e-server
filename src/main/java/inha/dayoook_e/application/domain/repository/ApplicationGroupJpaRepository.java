@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -27,5 +28,7 @@ public interface ApplicationGroupJpaRepository extends JpaRepository<Application
     Slice<ApplicationGroup> findSliceByTuteeAndStatusAndState(User user, Status status, BaseEntity.State state, PageRequest pageRequest);
 
     Slice<ApplicationGroup> findSliceByTuteeAndState(User user, BaseEntity.State state, PageRequest pageRequest);
+
+    List<ApplicationGroup> findAllByTuteeAndStatusAndState(User user, Status status, BaseEntity.State state);
 
 }
