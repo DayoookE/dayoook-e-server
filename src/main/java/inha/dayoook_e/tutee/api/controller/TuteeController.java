@@ -4,6 +4,7 @@ import inha.dayoook_e.application.domain.enums.Status;
 import inha.dayoook_e.common.BaseResponse;
 import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.tutee.api.controller.dto.response.SearchTuteeApplicationResponse;
+import inha.dayoook_e.tutee.api.controller.dto.response.TuteeScheduleResponse;
 import inha.dayoook_e.tutee.api.service.TuteeService;
 import inha.dayoook_e.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import static inha.dayoook_e.common.code.status.ErrorStatus.INVALID_PAGE;
 import static inha.dayoook_e.common.code.status.SuccessStatus.TUTEE_APPLICATION_SEARCH_OK;
+import static inha.dayoook_e.common.code.status.SuccessStatus.TUTEE_SCHEDULE_SEARCH_OK;
 
 
 /**
@@ -51,5 +53,13 @@ public class TuteeController {
             throw new BaseException(INVALID_PAGE);
         }
         return BaseResponse.of(TUTEE_APPLICATION_SEARCH_OK, tuteeService.getTuteeApplications(user, page - 1, status));
+    }
+
+    @GetMapping("/schedule")
+    @Operation(summary = "튜티 스케줄 조회 API", description = "튜티의 월별 스케줄을 조회합니다.")
+    public BaseResponse<TuteeScheduleResponse> getTuteeSchedule(@AuthenticationPrincipal User user,
+                                                                @RequestParam(required = false, value = "year") Integer year,
+                                                                @RequestParam(required = false, value = "month") Integer month) {
+        return BaseResponse.of(TUTEE_SCHEDULE_SEARCH_OK, tuteeService.getTuteeSchedule(user, year, month));
     }
 }
