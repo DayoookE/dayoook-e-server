@@ -4,6 +4,7 @@ import inha.dayoook_e.application.domain.Application;
 import inha.dayoook_e.application.domain.ApplicationGroup;
 import inha.dayoook_e.application.domain.repository.ApplicationGroupJpaRepository;
 import inha.dayoook_e.common.exceptions.BaseException;
+import inha.dayoook_e.lesson.api.controller.dto.request.CancelLessonRequest;
 import inha.dayoook_e.lesson.api.controller.dto.request.CompleteLessonRequest;
 import inha.dayoook_e.lesson.api.controller.dto.request.CreateLessonRequest;
 import inha.dayoook_e.lesson.api.controller.dto.request.CreateLessonScheduleRequest;
@@ -161,6 +162,40 @@ public class LessonServiceImpl implements LessonService {
         schedule.complete();
         lessonScheduleJpaRepository.save(schedule);
 
+        return lessonMapper.toLessonScheduleResponse(schedule, schedule.getMeetingRoom());
+    }
+
+    /**
+     * 강의 취소 처리
+     *
+     * @param user 현재 로그인한 사용자
+     * @param scheduleId 강의 일정 ID
+     * @param cancelLessonRequest 강의 취소 처리 요청
+     * @return LessonScheduleResponse
+     */
+    @Override
+    public LessonScheduleResponse cancelLessonSchedule(User user, Integer scheduleId, CancelLessonRequest cancelLessonRequest) {
+        // 1. 수업 일정 조회
+        LessonSchedule schedule = lessonScheduleJpaRepository.findById(scheduleId)
+                .orElseThrow(() -> new BaseException(LESSON_SCHEDULE_NOT_FOUND));
+
+        // 2. 튜터 권한 확인
+        if (!schedule.getLesson().getApplicationGroup().getTutor().getId().equals(user.getId())) {
+            throw new BaseException(UNAUTHORIZED_TUTOR);
+        }
+
+        // 3. 수업 상태 확인
+        if (!schedule.getStatus().equals(SCHEDULED)) {
+            throw new BaseException(INVALID_LESSON_STATUS);
+        }
+
+        // 4. 수업 시작 전인지 확인(테스트를 위해 주석)
+//        if (LocalDateTime.now().isAfter(schedule.getStartAt())) {
+//            throw new BaseException(LESSON_ALREADY_STARTED);
+//        }
+
+        // 5. 수업 취소 처리
+        schedule.cancel(cancelLessonRequest.reason());
         return lessonMapper.toLessonScheduleResponse(schedule, schedule.getMeetingRoom());
     }
 

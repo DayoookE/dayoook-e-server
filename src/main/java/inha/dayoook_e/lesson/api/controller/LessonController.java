@@ -1,6 +1,7 @@
 package inha.dayoook_e.lesson.api.controller;
 
 import inha.dayoook_e.common.BaseResponse;
+import inha.dayoook_e.lesson.api.controller.dto.request.CancelLessonRequest;
 import inha.dayoook_e.lesson.api.controller.dto.request.CompleteLessonRequest;
 import inha.dayoook_e.lesson.api.controller.dto.request.CreateLessonScheduleRequest;
 import inha.dayoook_e.lesson.api.controller.dto.response.LessonScheduleResponse;
@@ -14,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import static inha.dayoook_e.common.code.status.SuccessStatus.LESSON_SCHEDULE_CANCEL_OK;
 import static inha.dayoook_e.common.code.status.SuccessStatus.LESSON_SCHEDULE_COMPLETE_OK;
 import static inha.dayoook_e.common.code.status.SuccessStatus.LESSON_SCHEDULE_CREATE_OK;
 
@@ -63,6 +65,23 @@ public class LessonController {
         log.info("강의 완료 처리 요청: {} {}", user.getName(), scheduleId);
         return BaseResponse.of(LESSON_SCHEDULE_COMPLETE_OK, lessonService.completeLessonSchedule(user, scheduleId, completeLessonRequest)
         );
+    }
+
+    /**
+     * 강의 취소 처리
+     *
+     * @param user 현재 로그인한 사용자
+     * @param scheduleId 강의 일정 ID
+     * @param cancelLessonRequest 강의 취소 처리 요청
+     * @return LessonScheduleResponse
+     */
+    @PatchMapping("/schedules/{scheduleId}/cancel")
+    @Operation(summary = "강의 취소 처리 API", description = "튜터가 강의를 취소 처리합니다.")
+    public BaseResponse<LessonScheduleResponse> cancelLessonSchedule(@AuthenticationPrincipal User user,
+                                                                     @PathVariable("scheduleId") Integer scheduleId,
+                                                                     @Validated @RequestBody CancelLessonRequest cancelLessonRequest) {
+        log.info("강의 취소 처리 요청: {} {}", user.getName(), scheduleId);
+        return BaseResponse.of(LESSON_SCHEDULE_CANCEL_OK, lessonService.cancelLessonSchedule(user, scheduleId, cancelLessonRequest));
     }
 
 

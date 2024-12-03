@@ -33,6 +33,9 @@ public class LessonSchedule {
     @Column(name = "start_at", nullable = false)
     private LocalDateTime startAt; // 수업 시작 시간
 
+    @Column
+    private String reason; // 수업 취소 사유
+
     @OneToOne(mappedBy = "lessonSchedule", fetch = FetchType.LAZY)
     private MeetingRoom meetingRoom;
 
@@ -46,5 +49,10 @@ public class LessonSchedule {
         this.status = Status.COMPLETED;
     }
 
+    public void cancel(String reason) {
+        this.attendance = Boolean.FALSE;
+        this.status = Status.CANCELED;
+        this.reason = reason;
+    }
 
 }
