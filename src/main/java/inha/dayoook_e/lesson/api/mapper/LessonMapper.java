@@ -22,6 +22,7 @@ public interface LessonMapper {
 
     /**
      * Application을 CreateLessonRequest로 변환해주는 매퍼
+     *
      * @param application 등록할 신청 정보
      * @return createCourseRequest
      */
@@ -42,9 +43,9 @@ public interface LessonMapper {
     /**
      * Lesson, MeetingRoom, LocalDateTime을 LessonSchedule로 변환하는 매퍼
      *
-     * @param lesson 강의
+     * @param lesson      강의
      * @param meetingRoom 회의실
-     * @param startAt 시작 시간
+     * @param startAt     시작 시간
      * @return LessonSchedule
      */
     @Mapping(target = "id", ignore = true)
@@ -55,10 +56,15 @@ public interface LessonMapper {
     /**
      * LessonSchedule을 LessonScheduleResponse로 변환하는 매퍼
      *
-     * @param schedule 수업 일정
+     * @param schedule    수업 일정
      * @param meetingRoom 회의실
      * @return LessonScheduleResponse
      */
     @Mapping(target = "id", source = "schedule.id")
+    @Mapping(target = "status", source = "schedule.status")
+    @Mapping(target = "attendance", source = "schedule.attendance")
+    @Mapping(target = "startAt", source = "schedule.startAt")
+    @Mapping(target = "roomUrl", source = "meetingRoom.roomUrl")
     LessonScheduleResponse toLessonScheduleResponse(LessonSchedule schedule, MeetingRoom meetingRoom);
+
 }

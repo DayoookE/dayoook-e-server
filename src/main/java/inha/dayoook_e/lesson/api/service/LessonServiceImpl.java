@@ -4,6 +4,7 @@ import inha.dayoook_e.application.domain.Application;
 import inha.dayoook_e.application.domain.ApplicationGroup;
 import inha.dayoook_e.application.domain.repository.ApplicationGroupJpaRepository;
 import inha.dayoook_e.common.exceptions.BaseException;
+import inha.dayoook_e.lesson.api.controller.dto.request.CompleteLessonRequest;
 import inha.dayoook_e.lesson.api.controller.dto.request.CreateLessonRequest;
 import inha.dayoook_e.lesson.api.controller.dto.request.CreateLessonScheduleRequest;
 import inha.dayoook_e.lesson.api.controller.dto.response.LessonResponse;
@@ -27,6 +28,7 @@ import java.util.UUID;
 
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.common.code.status.ErrorStatus.*;
+import static inha.dayoook_e.lesson.domain.enums.Status.SCHEDULED;
 
 /**
  * LessonServiceImpl은 교육 관련 비즈니스 로직을 처리하는 서비스 클래스.
@@ -64,6 +66,13 @@ public class LessonServiceImpl implements LessonService {
     }
 
 
+    /**
+     * 강의 일정 생성
+     *
+     * @param user 현재 로그인한 사용자
+     * @param createLessonScheduleRequest 강의 일정 생성 요청
+     * @return LessonScheduleResponse
+     */
     @Override
     @Transactional
     public LessonScheduleResponse createLessonSchedule(User user, CreateLessonScheduleRequest createLessonScheduleRequest ) {
@@ -116,6 +125,43 @@ public class LessonServiceImpl implements LessonService {
 
         meetingRoom = meetingRoomJpaRepository.save(meetingRoom);
         return lessonMapper.toLessonScheduleResponse(savedSchedule, meetingRoom);
+    }
+
+
+    /**
+     * 강의 완료 처리
+     *
+     * @param user 현재 로그인한 사용자
+     * @param scheduleId 강의 일정 ID
+     * @param completeLessonRequest 강의 완료 처리 요청
+     * @return LessonScheduleResponse
+     */
+    @Override
+    public LessonScheduleResponse completeLessonSchedule(User user, Integer scheduleId, CompleteLessonRequest completeLessonRequest) {
+        // 1. 수업 일정 조회
+        LessonSchedule schedule = lessonScheduleJpaRepository.findById(scheduleId)
+                .orElseThrow(() -> new BaseException(LESSON_SCHEDULE_NOT_FOUND));
+
+        // 2. 튜터 권한 확인
+        if (!schedule.getLesson().getApplicationGroup().getTutor().getId().equals(user.getId())) {
+            throw new BaseException(UNAUTHORIZED_TUTOR);
+        }
+
+        // 3. 수업 상태 확인
+        if (!schedule.getStatus().equals(SCHEDULED)) {
+            throw new BaseException(INVALID_LESSON_STATUS);
+        }
+
+        // 4. 수업 시작 시간이 지났는지 확인(테스트를 위해 주석)
+//        if (LocalDateTime.now().isBefore(schedule.getStartAt())) {
+//            throw new BaseException(LESSON_NOT_STARTED);
+//        }
+
+        // 5. 수업 완료 처리
+        schedule.complete();
+        lessonScheduleJpaRepository.save(schedule);
+
+        return lessonMapper.toLessonScheduleResponse(schedule, schedule.getMeetingRoom());
     }
 
     private LocalDateTime calculateNextClassTime(LocalDateTime now, String dayName, String timeSlot) {

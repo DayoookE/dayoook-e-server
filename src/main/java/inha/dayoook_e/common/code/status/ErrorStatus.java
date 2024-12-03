@@ -62,6 +62,9 @@ public enum ErrorStatus implements BaseErrorCode {
     TOO_EARLY_TO_CREATE_LESSON(HttpStatus.BAD_REQUEST, "LESSON4002", "강의 생성이 너무 이릅니다."),
     LESSON_SCHEDULE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "LESSON4003", "이미 생성된 강의 일정이 있습니다."),
     INVALID_DAY_NAME(HttpStatus.BAD_REQUEST, "LESSON4004", "유효하지 않은 요일 이름입니다."),
+    LESSON_SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "LESSON4005", "강의 일정을 찾을 수 없습니다."),
+    INVALID_LESSON_STATUS(HttpStatus.BAD_REQUEST, "LESSON4006", "유효하지 않은 강의 상태입니다."),
+    LESSON_NOT_STARTED(HttpStatus.BAD_REQUEST, "LESSON4007", "수업이 시작되지 않았습니다."),
 
     EMPTY_JWT(HttpStatus.UNAUTHORIZED, "JWT4000", "JWT를 입력해주세요"),
     INVALID_JWT(HttpStatus.UNAUTHORIZED, "JWT4001", "유효하지 않은 JWT입니다."),

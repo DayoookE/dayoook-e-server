@@ -16,6 +16,10 @@ public record LessonScheduleResponse(
         Status status,
 
         @NotNull
+        @Schema(description = "출석 여부", example = "false")
+        Boolean attendance,
+
+        @NotNull
         @Schema(description = "수업 시작 시간", example = "2021-10-01T10:00:00")
         LocalDateTime startAt,
 

@@ -41,5 +41,10 @@ public class LessonSchedule {
     private Lesson lesson;
 
 
+    public void complete() {
+        this.attendance = Boolean.TRUE;
+        this.status = Status.COMPLETED;
+    }
+
 
 }
