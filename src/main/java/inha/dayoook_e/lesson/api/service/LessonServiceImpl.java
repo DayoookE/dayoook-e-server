@@ -107,10 +107,10 @@ public class LessonServiceImpl implements LessonService {
 //        }
 
         // 6. 해당 시간에 이미 수업이 있는지 확인
-        boolean exists = lessonScheduleJpaRepository.existsByLessonAndStartAt(lesson, nextClassTime);
-        if (exists) {
-            throw new BaseException(LESSON_SCHEDULE_ALREADY_EXISTS);
-        }
+//        boolean exists = lessonScheduleJpaRepository.existsByLessonAndStartAt(lesson, nextClassTime);
+//        if (exists) {
+//            throw new BaseException(LESSON_SCHEDULE_ALREADY_EXISTS);
+//        }
 
         // 7. 회의실 생성 (더미 데이터)
         LessonSchedule lessonSchedule = lessonMapper.toLessonSchedule(lesson, null, nextClassTime);

@@ -5,6 +5,7 @@ import inha.dayoook_e.common.BaseEntity.State;
 import inha.dayoook_e.lesson.domain.Lesson;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -13,4 +14,6 @@ import java.util.Optional;
 public interface LessonJpaRepository extends JpaRepository<Lesson, Integer> {
 
     Optional<Lesson> findByIdAndState(Integer id, State state);
+
+    List<Lesson> findAllByApplicationGroup_Tutee_IdAndState(Integer tuteeId, State state);
 }

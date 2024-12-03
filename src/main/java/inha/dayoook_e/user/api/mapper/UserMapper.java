@@ -5,10 +5,7 @@ import inha.dayoook_e.mapping.domain.Language;
 import inha.dayoook_e.tutee.domain.TuteeInfo;
 import inha.dayoook_e.user.api.controller.dto.request.TuteeSignupRequest;
 import inha.dayoook_e.user.api.controller.dto.request.TutorSignupRequest;
-import inha.dayoook_e.user.api.controller.dto.response.SignupResponse;
-import inha.dayoook_e.user.api.controller.dto.response.TuteeInfoResponse;
-import inha.dayoook_e.user.api.controller.dto.response.TutorInfoResponse;
-import inha.dayoook_e.user.api.controller.dto.response.UserInfoResponse;
+import inha.dayoook_e.user.api.controller.dto.response.*;
 import inha.dayoook_e.user.domain.User;
 import inha.dayoook_e.user.domain.UserLanguage;
 import inha.dayoook_e.user.domain.id.UserLanguageId;
@@ -90,7 +87,8 @@ public interface UserMapper {
      * @return TuteeInfoResponse
      */
     @Mapping(target ="id", source = "user.id")
-    TuteeInfoResponse userToTuteeInfoResponse(User user, TuteeInfo tuteeInfo);
+    @Mapping(target = "name", source = "user.name")
+    TuteeInfoResponse userToTuteeInfoResponse(User user, TuteeInfo tuteeInfo, Double attendanceRate, UpcomingLessonInfo upcomingLesson);
 
     @Mapping(target ="id", source = "user.id")
     TutorInfoResponse userToTutorInfoResponse(User user);

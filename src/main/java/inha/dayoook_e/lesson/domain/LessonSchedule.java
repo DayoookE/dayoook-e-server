@@ -1,5 +1,6 @@
 package inha.dayoook_e.lesson.domain;
 
+import inha.dayoook_e.common.BaseEntity;
 import inha.dayoook_e.lesson.domain.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
