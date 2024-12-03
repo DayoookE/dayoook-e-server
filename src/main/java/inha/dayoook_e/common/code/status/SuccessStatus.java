@@ -46,6 +46,9 @@ public enum SuccessStatus implements BaseCode {
     STORYBOOK_SEARCH_OK(HttpStatus.OK, "STORYBOOK2004", "동화 상세 조회 성공"),
     STORYBOOK_UPDATE_LAST_READ_PAGE_OK(HttpStatus.OK, "STORYBOOK2005", "동화 마지막 읽은 페이지 업데이트 성공"),
 
+    //강의 일정 생성
+    LESSON_SCHEDULE_CREATE_OK(HttpStatus.CREATED, "LESSON2000", "강의 일정 생성 성공"),
+
     LANGUAGES_SEARCH_OK(HttpStatus.OK, "MAPPING2000", "언어 목록 조회 성공"),
     COUNTRIES_SEARCH_OK(HttpStatus.OK, "MAPPING2001", "국가 목록 조회 성공"),
     AGE_GROUPS_SEARCH_OK(HttpStatus.OK, "MAPPING2002", "연령대 목록 조회 성공"),

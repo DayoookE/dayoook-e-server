@@ -57,6 +57,12 @@ public enum ErrorStatus implements BaseErrorCode {
 
     TUTORINFO_NOT_FOUND(HttpStatus.NOT_FOUND, "TUTORINFO4000", "튜터 정보를 찾을 수 없습니다."),
 
+    LESSON_NOT_FOUND(HttpStatus.NOT_FOUND, "LESSON4000", "강의를 찾을 수 없습니다."),
+    UNAUTHORIZED_TUTOR(HttpStatus.FORBIDDEN, "LESSON4001", "권한이 없는 튜터의 접근입니다."),
+    TOO_EARLY_TO_CREATE_LESSON(HttpStatus.BAD_REQUEST, "LESSON4002", "강의 생성이 너무 이릅니다."),
+    LESSON_SCHEDULE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "LESSON4003", "이미 생성된 강의 일정이 있습니다."),
+    INVALID_DAY_NAME(HttpStatus.BAD_REQUEST, "LESSON4004", "유효하지 않은 요일 이름입니다."),
+
     EMPTY_JWT(HttpStatus.UNAUTHORIZED, "JWT4000", "JWT를 입력해주세요"),
     INVALID_JWT(HttpStatus.UNAUTHORIZED, "JWT4001", "유효하지 않은 JWT입니다."),
     INVALID_USER_JWT(HttpStatus.FORBIDDEN, "JWT4002", "권한이 없는 유저의 접근입니다."),
