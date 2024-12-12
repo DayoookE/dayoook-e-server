@@ -3,6 +3,7 @@ package inha.dayoook_e.lesson.api.mapper;
 import inha.dayoook_e.application.domain.Application;
 import inha.dayoook_e.application.domain.ApplicationGroup;
 import inha.dayoook_e.lesson.api.controller.dto.request.CreateLessonRequest;
+import inha.dayoook_e.lesson.api.controller.dto.request.MeetingRequest;
 import inha.dayoook_e.lesson.api.controller.dto.response.LessonResponse;
 import inha.dayoook_e.lesson.api.controller.dto.response.LessonScheduleResponse;
 import inha.dayoook_e.lesson.domain.Lesson;
@@ -67,4 +68,5 @@ public interface LessonMapper {
     @Mapping(target = "roomUrl", source = "meetingRoom.roomUrl")
     LessonScheduleResponse toLessonScheduleResponse(LessonSchedule schedule, MeetingRoom meetingRoom);
 
+    MeetingRequest toMeetingRequest(String tutor_email, String tutee_email);
 }

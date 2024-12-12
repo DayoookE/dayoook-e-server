@@ -4,28 +4,32 @@ import inha.dayoook_e.application.domain.Application;
 import inha.dayoook_e.application.domain.ApplicationGroup;
 import inha.dayoook_e.application.domain.repository.ApplicationGroupJpaRepository;
 import inha.dayoook_e.common.exceptions.BaseException;
-import inha.dayoook_e.lesson.api.controller.dto.request.CancelLessonRequest;
-import inha.dayoook_e.lesson.api.controller.dto.request.CompleteLessonRequest;
-import inha.dayoook_e.lesson.api.controller.dto.request.CreateLessonRequest;
-import inha.dayoook_e.lesson.api.controller.dto.request.CreateLessonScheduleRequest;
+import inha.dayoook_e.lesson.api.controller.dto.request.*;
 import inha.dayoook_e.lesson.api.controller.dto.response.LessonResponse;
 import inha.dayoook_e.lesson.api.controller.dto.response.LessonScheduleResponse;
+import inha.dayoook_e.lesson.api.controller.dto.response.MeetingResponse;
 import inha.dayoook_e.lesson.api.mapper.LessonMapper;
 import inha.dayoook_e.lesson.domain.Lesson;
 import inha.dayoook_e.lesson.domain.LessonSchedule;
 import inha.dayoook_e.lesson.domain.MeetingRoom;
-import inha.dayoook_e.lesson.domain.repository.*;
+import inha.dayoook_e.lesson.domain.repository.LessonJpaRepository;
+import inha.dayoook_e.lesson.domain.repository.LessonScheduleJpaRepository;
+import inha.dayoook_e.lesson.domain.repository.MeetingRoomJpaRepository;
 import inha.dayoook_e.mapping.domain.Day;
 import inha.dayoook_e.mapping.domain.TimeSlot;
 import inha.dayoook_e.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.common.code.status.ErrorStatus.*;
@@ -45,6 +49,11 @@ public class LessonServiceImpl implements LessonService {
     private final LessonJpaRepository lessonJpaRepository;
     private final LessonScheduleJpaRepository lessonScheduleJpaRepository;
     private final MeetingRoomJpaRepository meetingRoomJpaRepository;
+
+    private final RestTemplate restTemplate;
+
+    @Value("${fastapi.server.url}")
+    private String fastApiServerUrl;
 
     /**
      * 강의 생성
@@ -71,12 +80,13 @@ public class LessonServiceImpl implements LessonService {
      * 강의 일정 생성
      *
      * @param user 현재 로그인한 사용자
+     * @param accessToken 헤더에서 추출한 토큰
      * @param createLessonScheduleRequest 강의 일정 생성 요청
      * @return LessonScheduleResponse
      */
     @Override
     @Transactional
-    public LessonScheduleResponse createLessonSchedule(User user, CreateLessonScheduleRequest createLessonScheduleRequest ) {
+    public LessonScheduleResponse createLessonSchedule(User user, String accessToken, CreateLessonScheduleRequest createLessonScheduleRequest ) {
         // 1. 수업 존재 여부 확인 및 관련 정보 조회
         Lesson lesson = lessonJpaRepository.findByIdAndState(createLessonScheduleRequest.lessonId(), ACTIVE)
                 .orElseThrow(() -> new BaseException(LESSON_NOT_FOUND));
@@ -112,20 +122,45 @@ public class LessonServiceImpl implements LessonService {
 //            throw new BaseException(LESSON_SCHEDULE_ALREADY_EXISTS);
 //        }
 
-        // 7. 회의실 생성 (더미 데이터)
-        LessonSchedule lessonSchedule = lessonMapper.toLessonSchedule(lesson, null, nextClassTime);
-        LessonSchedule savedSchedule = lessonScheduleJpaRepository.save(lessonSchedule);
 
-        // 8. 회의실 생성
-        String dummyRoomUrl = "https://meet.dayoook-e.com/" + UUID.randomUUID();
-        MeetingRoom meetingRoom = MeetingRoom.builder()
-                .roomUrl(dummyRoomUrl)
-                .createdAt(now)
-                .lessonSchedule(savedSchedule)  // 저장된 스케줄 참조
-                .build();
+        // 7. 회의실 생성
+        String meetApiUrl = fastApiServerUrl + "/api/meet/create";
 
-        meetingRoom = meetingRoomJpaRepository.save(meetingRoom);
-        return lessonMapper.toLessonScheduleResponse(savedSchedule, meetingRoom);
+        // HTTP 헤더 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        // 요청 바디 생성
+        MeetingRequest meetingRequest = lessonMapper.toMeetingRequest(user.getEmail(), lesson.getApplicationGroup().getTutee().getEmail());
+
+        // HTTP 요청 엔티티 생성
+        HttpEntity<MeetingRequest> requestEntity = new HttpEntity<>(meetingRequest, headers);
+
+        try {
+            // FastAPI 서버로 POST 요청 보내기
+            MeetingResponse response = restTemplate.postForObject(
+                    meetApiUrl,
+                    requestEntity,
+                    MeetingResponse.class
+            );
+
+            // 7. 회의실 생성 (FastAPI에서 받은 실제 미팅 URL 사용)
+            LessonSchedule lessonSchedule = lessonMapper.toLessonSchedule(lesson, null, nextClassTime);
+            LessonSchedule savedSchedule = lessonScheduleJpaRepository.save(lessonSchedule);
+
+            // 8. 회의실 생성 (실제 Google Meet URL 사용)
+            MeetingRoom meetingRoom = MeetingRoom.builder()
+                    .roomUrl(response.meeting_uri())
+                    .createdAt(LocalDateTime.now())
+                    .lessonSchedule(savedSchedule)
+                    .build();
+
+            meetingRoom = meetingRoomJpaRepository.save(meetingRoom);
+            return lessonMapper.toLessonScheduleResponse(savedSchedule, meetingRoom);
+
+        } catch (Exception e) {
+            log.error("Failed to create meeting room: ", e);
+            throw new BaseException(MEETING_ROOM_CREATION_FAILED);
+        }
     }
 
 
