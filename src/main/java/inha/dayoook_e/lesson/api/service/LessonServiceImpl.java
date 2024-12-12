@@ -123,17 +123,14 @@ public class LessonServiceImpl implements LessonService {
 //        }
 
 
-        // 7. 회의실 생성 (더미 데이터)
+        // 7. 회의실 생성
         String meetApiUrl = fastApiServerUrl + "/api/meet/create";
 
         // HTTP 헤더 설정
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        // 받은 인증 토큰을 그대로 전달
-        log.info("!!@!@!@!@accessToken: {}", accessToken);
-        headers.set("Authorization", accessToken);
         // 요청 바디 생성
-        MeetingRequest meetingRequest = lessonMapper.toMeetingRequest(user.getEmail());
+        MeetingRequest meetingRequest = lessonMapper.toMeetingRequest(user.getEmail(), lesson.getApplicationGroup().getTutee().getEmail());
 
         // HTTP 요청 엔티티 생성
         HttpEntity<MeetingRequest> requestEntity = new HttpEntity<>(meetingRequest, headers);

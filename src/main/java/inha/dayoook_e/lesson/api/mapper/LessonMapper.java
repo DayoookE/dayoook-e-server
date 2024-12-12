@@ -68,5 +68,5 @@ public interface LessonMapper {
     @Mapping(target = "roomUrl", source = "meetingRoom.roomUrl")
     LessonScheduleResponse toLessonScheduleResponse(LessonSchedule schedule, MeetingRoom meetingRoom);
 
-    MeetingRequest toMeetingRequest(String tutor_email);
+    MeetingRequest toMeetingRequest(String tutor_email, String tutee_email);
 }
