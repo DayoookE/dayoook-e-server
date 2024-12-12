@@ -11,7 +11,7 @@ import inha.dayoook_e.user.domain.User;
 public interface LessonService {
 
     LessonResponse createLesson(CreateLessonRequest createLessonRequest);
-    LessonScheduleResponse createLessonSchedule(User user, CreateLessonScheduleRequest createLessonScheduleRequest);
+    LessonScheduleResponse createLessonSchedule(User user, String accessToken, CreateLessonScheduleRequest createLessonScheduleRequest);
 
     LessonScheduleResponse completeLessonSchedule(User user, Integer scheduleId, CompleteLessonRequest completeLessonRequest);
     LessonScheduleResponse cancelLessonSchedule(User user, Integer scheduleId, CancelLessonRequest cancelLessonRequest);

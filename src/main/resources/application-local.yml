@@ -44,3 +44,8 @@ cloud:
       instance-profile: true
       accessKey: ${S3_ACCESSKEY}
       secretKey: ${S3_SECRETKEY}
+
+
+fastapi:
+  server:
+    url: http://localhost:6262

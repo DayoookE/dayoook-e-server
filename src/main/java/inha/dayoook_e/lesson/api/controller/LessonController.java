@@ -44,9 +44,12 @@ public class LessonController {
     @Operation(summary = "강의 일정 생성 API", description = "튜터가 강의 일정을 생성합니다.")
     public BaseResponse<LessonScheduleResponse> createLessonSchedule(
             @AuthenticationPrincipal User user,
+            @RequestHeader(value = "Authorization") String authToken,  // 헤더에서 토큰 추출
             @Validated @RequestBody CreateLessonScheduleRequest createLessonScheduleRequest) {
+
         log.info("강의 일정 생성 요청: {} {}", user.getName(), createLessonScheduleRequest);
-        return BaseResponse.of(LESSON_SCHEDULE_CREATE_OK, lessonService.createLessonSchedule(user, createLessonScheduleRequest));
+        return BaseResponse.of(LESSON_SCHEDULE_CREATE_OK,
+                lessonService.createLessonSchedule(user, authToken, createLessonScheduleRequest));
     }
 
     /**
