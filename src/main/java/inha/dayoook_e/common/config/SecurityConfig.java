@@ -4,6 +4,7 @@ import inha.dayoook_e.utils.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -86,7 +87,9 @@ public class SecurityConfig {
                                         "object-src 'none'"))
                 )
                 .authorizeHttpRequests(req ->
-                        req.requestMatchers(WHITE_LIST_URL).permitAll().
+                                req.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // OPTIONS 요청 허용
+                                        .requestMatchers(WHITE_LIST_URL).permitAll().
+
                                 requestMatchers(GET, GET_ONLY_WHITE_LIST_URL).permitAll()  // GET 요청만 허용
                                 // 관리자 전용 접근 설정
                                 .requestMatchers(ADMIN_URL).hasRole(ADMIN.name())
