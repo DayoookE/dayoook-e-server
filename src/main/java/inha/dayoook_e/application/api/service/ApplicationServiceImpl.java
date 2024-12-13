@@ -175,60 +175,90 @@ public class ApplicationServiceImpl implements ApplicationService{
      */
     @Override
     public ApplicationResponse approveApplication(User tutor, Integer applicationGroupId) {
-        // 1. tutor의 권한이 tutor인지 확인
+        log.info("=== 승인 프로세스 시작 ===");
+        log.info("요청 정보 - Tutor ID: {}, ApplicationGroup ID: {}", tutor.getId(), applicationGroupId);
+
+        // 1. tutor 권한 체크
+        log.info("1. 튜터 권한 확인 - 현재 role: {}", tutor.getRole());
         if (!tutor.getRole().equals(Role.TUTOR)) {
+            log.error("튜터 권한이 아닙니다. 현재 role: {}", tutor.getRole());
             throw new BaseException(INVALID_ROLE);
         }
 
         // 2. ApplicationGroup 조회
+        log.info("2. ApplicationGroup 조회 시도 - ID: {}, State: {}", applicationGroupId, ACTIVE);
         ApplicationGroup applicationGroup = applicationGroupJpaRepository.findByIdAndState(applicationGroupId, ACTIVE)
-                .orElseThrow(() -> new BaseException(APPLICATION_GROUP_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.error("ApplicationGroup을 찾을 수 없습니다 - ID: {}, State: {}", applicationGroupId, ACTIVE);
+                    return new BaseException(APPLICATION_GROUP_NOT_FOUND);
+                });
+        log.info("ApplicationGroup 조회 성공 - Group Status: {}, Tutor ID: {}",
+                applicationGroup.getStatus(), applicationGroup.getTutor().getId());
 
-        // 3. ApplicationGroup의 튜터와 로그인한 튜터가 일치하는지 확인
+        // 3. ApplicationGroup의 튜터 일치 확인
+        log.info("3. 튜터 일치 확인 - 로그인 튜터: {}, 그룹 튜터: {}",
+                tutor.getId(), applicationGroup.getTutor().getId());
         if (!applicationGroup.getTutor().getId().equals(tutor.getId())) {
+            log.error("튜터가 일치하지 않습니다 - 로그인: {}, 그룹: {}",
+                    tutor.getId(), applicationGroup.getTutor().getId());
             throw new BaseException(INVALID_ROLE);
         }
 
-        // 4. ApplicationGroup의 상태가 APPLYING인지 확인
+        // 4. ApplicationGroup 상태 확인
+        log.info("4. ApplicationGroup 상태 확인 - 현재 상태: {}", applicationGroup.getStatus());
         if (applicationGroup.getStatus() != APPLYING) {
+            log.error("잘못된 ApplicationGroup 상태 - 현재: {}, 요구: {}",
+                    applicationGroup.getStatus(), APPLYING);
             throw new BaseException(INVALID_APPLICATION_STATUS);
         }
 
-        // 5. 모든 시간대에 대해 스케줄 가용성 확인
+        // 5. 스케줄 가용성 확인
+        log.info("5. 스케줄 가용성 확인 시작");
         for (Application application : applicationGroup.getApplications()) {
             TutorScheduleId scheduleId = new TutorScheduleId(
                     tutor.getId(),
                     application.getDay().getId(),
                     application.getTimeSlot().getId()
             );
+            log.info("스케줄 확인 - TutorID: {}, DayID: {}, TimeSlotID: {}",
+                    scheduleId.getUserId(), scheduleId.getDayId(), scheduleId.getTimeSlotId());
 
             TutorSchedule tutorSchedule = tutorScheduleJpaRepository.findById(scheduleId)
-                    .orElseThrow(() -> new BaseException(SCHEDULE_NOT_FOUND));
+                    .orElseThrow(() -> {
+                        log.error("스케줄을 찾을 수 없습니다 - {}", scheduleId);
+                        return new BaseException(SCHEDULE_NOT_FOUND);
+                    });
+            log.info("스케줄 조회 성공 - 가용 여부: {}", tutorSchedule.getIsAvailable());
 
             if (!tutorSchedule.getIsAvailable()) {
+                log.error("이미 예약된 스케줄입니다 - {}", scheduleId);
                 throw new BaseException(SCHEDULE_ALREADY_BOOKED);
             }
         }
 
-        // 6. 승인되는 시간대와 겹치는 다른 신청들 찾아서 거절 처리
+        // 6. 겹치는 신청 처리
+        log.info("6. 겹치는 신청 확인 시작");
         List<ApplicationGroup> conflictingApplicationGroups = findConflictingApplicationGroups(
-                applicationGroup.getApplications(),
-                tutor
+                applicationGroup.getApplications(), tutor
         );
+        log.info("겹치는 신청 수: {}", conflictingApplicationGroups.size());
 
         for (ApplicationGroup conflictGroup : conflictingApplicationGroups) {
-            // 현재 승인하는 그룹과 다른 그룹들은 거절 처리
             if (!conflictGroup.getId().equals(applicationGroupId)) {
+                log.info("겹치는 신청 거절 처리 - Group ID: {}", conflictGroup.getId());
                 for (Application application : conflictGroup.getApplications()) {
                     application.changeStatus(Status.REJECTED);
+                    log.info("신청 거절 완료 - Application ID: {}", application.getId());
                 }
                 conflictGroup.changeStatus(Status.REJECTED);
+                log.info("그룹 거절 완료 - Group ID: {}", conflictGroup.getId());
             }
         }
 
-        // 7. 현재 승인하는 ApplicationGroup 처리
+        // 7. 현재 그룹 처리
+        log.info("7. 현재 ApplicationGroup 처리 시작");
         for (Application application : applicationGroup.getApplications()) {
-            // 7.1. TutorSchedule 업데이트
+            // 7.1. 스케줄 업데이트
             TutorScheduleId scheduleId = new TutorScheduleId(
                     tutor.getId(),
                     application.getDay().getId(),
@@ -236,20 +266,24 @@ public class ApplicationServiceImpl implements ApplicationService{
             );
             TutorSchedule tutorSchedule = tutorScheduleJpaRepository.findById(scheduleId).get();
             tutorSchedule.makeUnavailable();
+            log.info("스케줄 업데이트 완료 - {}", scheduleId);
 
             // 7.2. Lesson 생성
             CreateLessonRequest createLessonRequest = lessonMapper.toCreateLessonRequest(application);
             LessonResponse lessonResponse = lessonService.createLesson(createLessonRequest);
-            log.info("Lesson 생성 성공, Lesson ID : {}", lessonResponse.id());
+            log.info("Lesson 생성 성공 - Lesson ID: {}", lessonResponse.id());
 
-            // 7.3. Application 상태 변경
+            // 7.3. 상태 변경
             application.changeStatus(APPROVED);
+            log.info("신청 승인 완료 - Application ID: {}", application.getId());
         }
 
-        // 8. ApplicationGroup 상태 변경
+        // 8. 그룹 상태 변경
         applicationGroup.changeStatus(APPROVED);
+        log.info("ApplicationGroup 승인 완료 - Group ID: {}", applicationGroupId);
 
         // 9. 결과 반환
+        log.info("=== 승인 프로세스 완료 ===");
         return applicationMapper.toApplicationResponse(applicationGroup);
     }
 
