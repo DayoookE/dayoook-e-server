@@ -1,12 +1,12 @@
 package inha.dayoook_e.lesson.api.service;
 
-import inha.dayoook_e.lesson.api.controller.dto.request.CancelLessonRequest;
-import inha.dayoook_e.lesson.api.controller.dto.request.CompleteLessonRequest;
-import inha.dayoook_e.lesson.api.controller.dto.request.CreateLessonRequest;
-import inha.dayoook_e.lesson.api.controller.dto.request.CreateLessonScheduleRequest;
+import inha.dayoook_e.lesson.api.controller.dto.request.*;
 import inha.dayoook_e.lesson.api.controller.dto.response.LessonResponse;
 import inha.dayoook_e.lesson.api.controller.dto.response.LessonScheduleResponse;
+import inha.dayoook_e.lesson.api.controller.dto.response.LessonSchedulesResponse;
 import inha.dayoook_e.user.domain.User;
+
+import java.util.List;
 
 public interface LessonService {
 
@@ -15,5 +15,6 @@ public interface LessonService {
 
     LessonScheduleResponse completeLessonSchedule(User user, Integer scheduleId, CompleteLessonRequest completeLessonRequest);
     LessonScheduleResponse cancelLessonSchedule(User user, Integer scheduleId, CancelLessonRequest cancelLessonRequest);
+    List<LessonSchedulesResponse> getLessonSchedules(User user, LessonSchedulesRequest lessonSchedulesRequest);
 
 }
