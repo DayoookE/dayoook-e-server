@@ -181,7 +181,7 @@ public class ApplicationServiceImpl implements ApplicationService{
         }
 
         // 2. ApplicationGroup 조회
-        ApplicationGroup applicationGroup = applicationGroupJpaRepository.findById(applicationGroupId)
+        ApplicationGroup applicationGroup = applicationGroupJpaRepository.findByIdAndState(applicationGroupId, ACTIVE)
                 .orElseThrow(() -> new BaseException(APPLICATION_GROUP_NOT_FOUND));
 
         // 3. ApplicationGroup의 튜터와 로그인한 튜터가 일치하는지 확인
