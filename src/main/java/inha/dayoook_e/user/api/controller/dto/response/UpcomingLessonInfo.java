@@ -17,6 +17,9 @@ public record UpcomingLessonInfo(
 
         @NotNull
         @Schema(description = "강의 시작 시간", example = "2024-12-03T15:00:00")
-        LocalDateTime startAt
+        LocalDateTime startAt,
+
+        @Schema(description = "구글미트 링크", example = "https://meet.google.com/abc-def-ghi")
+        String roomUrl
 ) {
 }

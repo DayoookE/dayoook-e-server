@@ -216,10 +216,12 @@ public class UserServiceImpl implements UserService {
         ApplicationGroup applicationGroup = upcomingSchedule.getLesson().getApplicationGroup();
         User tutor = applicationGroup.getTutor();
 
+
         return new UpcomingLessonInfo(
                 tutor.getId(),
                 tutor.getName(),
-                upcomingSchedule.getStartAt()
+                upcomingSchedule.getStartAt(),
+                upcomingSchedule.getMeetingRoom().getRoomUrl()
         );
     }
 }
