@@ -356,7 +356,12 @@ public class TutorServiceImpl implements TutorService {
                     .orElse(null);
 
             // SearchTutorApplicationResponse 생성
-            return tutorMapper.toSearchTutorApplicationResponse(applicationGroup, tuteeInfo, languages, scheduleTimeSlots, lesson.getId());
+            return tutorMapper.toSearchTutorApplicationResponse(
+                    applicationGroup,
+                    tuteeInfo,
+                    languages,
+                    scheduleTimeSlots,
+                    lesson != null ? lesson.getId() : null); // Handle potential null lesson
         });
     }
 
