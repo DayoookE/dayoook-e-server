@@ -265,8 +265,8 @@ public class ApplicationServiceImpl implements ApplicationService{
             tutorSchedule.makeUnavailable();
             log.info("스케줄 업데이트 완료 - {}", scheduleId);
 
-            // 7.2. Lesson 생성
-            CreateLessonRequest createLessonRequest = lessonMapper.toCreateLessonRequest(application);
+            // 7.2. Lesson 생성료
+            CreateLessonRequest createLessonRequest = lessonMapper.toCreateLessonRequest(applicationGroup);
             LessonResponse lessonResponse = lessonService.createLesson(createLessonRequest);
             log.info("Lesson 생성 성공 - Lesson ID: {}", lessonResponse.id());
 

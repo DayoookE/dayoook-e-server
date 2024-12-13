@@ -24,10 +24,10 @@ public interface LessonMapper {
     /**
      * Application을 CreateLessonRequest로 변환해주는 매퍼
      *
-     * @param application 등록할 신청 정보
+     * @param applicationGroup 등록할 신청 정보
      * @return createCourseRequest
      */
-    CreateLessonRequest toCreateLessonRequest(Application application);
+    CreateLessonRequest toCreateLessonRequest(ApplicationGroup applicationGroup);
 
     /**
      * Lesson를 LessonResponse로 변환하는 매퍼
