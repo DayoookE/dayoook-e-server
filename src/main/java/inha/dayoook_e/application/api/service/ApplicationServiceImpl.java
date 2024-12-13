@@ -253,9 +253,16 @@ public class ApplicationServiceImpl implements ApplicationService{
         }
 
         // 7. 현재 그룹 처리
+        // 7. 현재 그룹 처리
         log.info("7. 현재 ApplicationGroup 처리 시작");
+
+        // 7.1. Lesson 생성 (반복문 밖으로 이동)
+        CreateLessonRequest createLessonRequest = lessonMapper.toCreateLessonRequest(applicationGroup);
+        LessonResponse lessonResponse = lessonService.createLesson(createLessonRequest);
+        log.info("Lesson 생성 성공 - Lesson ID: {}", lessonResponse.id());
+
         for (Application application : applicationGroup.getApplications()) {
-            // 7.1. 스케줄 업데이트
+            // 7.2. 스케줄 업데이트
             TutorScheduleId scheduleId = new TutorScheduleId(
                     tutor.getId(),
                     application.getDay().getId(),
@@ -264,11 +271,6 @@ public class ApplicationServiceImpl implements ApplicationService{
             TutorSchedule tutorSchedule = tutorScheduleJpaRepository.findById(scheduleId).get();
             tutorSchedule.makeUnavailable();
             log.info("스케줄 업데이트 완료 - {}", scheduleId);
-
-            // 7.2. Lesson 생성료
-            CreateLessonRequest createLessonRequest = lessonMapper.toCreateLessonRequest(applicationGroup);
-            LessonResponse lessonResponse = lessonService.createLesson(createLessonRequest);
-            log.info("Lesson 생성 성공 - Lesson ID: {}", lessonResponse.id());
 
             // 7.3. 상태 변경
             application.changeStatus(APPROVED);
