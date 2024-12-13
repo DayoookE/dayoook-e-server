@@ -17,6 +17,9 @@ public record SearchTutorApplicationResponse(
         @Schema(description = "신청 그룹 id", example = "1")
         Integer id,
 
+        @Schema(description = "레슨 id", example = "1")
+        Integer lessonId,
+
         @NotNull
         @Schema(description = "튜티 정보")
         TuteeInfoResponse tuteeInfo,

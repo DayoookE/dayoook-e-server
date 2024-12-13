@@ -51,6 +51,8 @@ public enum ErrorStatus implements BaseErrorCode {
     DUPLICATE_TIMESLOT(HttpStatus.BAD_REQUEST, "APPLICATION4005", "중복된 시간대가 있습니다."),
     TIMESLOT_ALREADY_BOOKED(HttpStatus.BAD_REQUEST, "APPLICATION4006", "이미 예약된 시간대가 있습니다."),
 
+    NOT_FIND_LESSON(HttpStatus.NOT_FOUND, "LESSON4000", "강의를 찾을 수 없습니다."),
+
     STORYBOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "STORYBOOK4000", "동화를 찾을 수 없습니다."),
     STORYBOOK_ALREADY_COMPLETE(HttpStatus.BAD_REQUEST, "STORYBOOK4001", "이미 완료한 동화입니다."),
     STORYBOOK_PAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORYBOOK4002", "동화 페이지를 찾을 수 없습니다."),

@@ -16,4 +16,6 @@ public interface LessonJpaRepository extends JpaRepository<Lesson, Integer> {
     Optional<Lesson> findByIdAndState(Integer id, State state);
 
     List<Lesson> findAllByApplicationGroup_Tutee_IdAndState(Integer tuteeId, State state);
+
+    Optional<Lesson> findByApplicationGroupIdAndState(Integer id, State state);
 }
