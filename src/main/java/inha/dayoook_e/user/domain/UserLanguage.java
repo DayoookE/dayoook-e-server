@@ -17,6 +17,7 @@ import lombok.*;
 @Table(name = "user_language_tb")
 public class UserLanguage {
 
+
     @EmbeddedId
     private UserLanguageId id;
 
