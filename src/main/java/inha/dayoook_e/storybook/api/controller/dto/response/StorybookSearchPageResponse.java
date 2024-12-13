@@ -28,7 +28,11 @@ public record StorybookSearchPageResponse(
         Boolean isCompleted,
 
         @NotNull
+        @Schema(description = "총 페이지 수", example = "5")
+        Integer totalPageNumber,
+
+        @NotNull
         @Schema(description = "마지막으로 읽은 페이지 번호", example = "1")
-        Integer lastPageNumber
+        Integer pageCount
 ) {
 }
