@@ -31,10 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static inha.dayoook_e.application.domain.enums.Status.APPLYING;
@@ -373,31 +370,32 @@ public class ApplicationServiceImpl implements ApplicationService{
             List<Application> currentApplications,
             User tutor
     ) {
-        // 현재 승인 대기 중이거나 이미 승인된 애플리케이션들 조회
-        List<ApplicationGroup> conflictGroups = new ArrayList<>();
-        List<Application> allActiveApplications = applicationJpaRepository.findAll().stream()
-                .filter(app ->
-                        (app.getApplicationGroup().getStatus() == APPLYING ||
-                                app.getApplicationGroup().getStatus() == APPROVED)
-                )
-                .collect(Collectors.toList());
+        log.info("겹치는 신청 찾기 시작 - 튜터 ID: {}", tutor.getId());
 
-        for (Application currentApp : currentApplications) {
-            // 현재 승인하려는 각 시간대에 대해 겹치는 다른 애플리케이션 그룹 찾기
-            List<ApplicationGroup> groupsWithConflictingTimeSlot = allActiveApplications.stream()
-                    .filter(app ->
-                            !app.getTutor().getId().equals(tutor.getId()) && // 현재 승인하는 튜터 제외
-                                    app.getDay().getId().equals(currentApp.getDay().getId()) &&
-                                    app.getTimeSlot().getId().equals(currentApp.getTimeSlot().getId())
-                    )
-                    .map(Application::getApplicationGroup)
-                    .distinct()
-                    .collect(Collectors.toList());
+        // 현재 신청의 시간대들을 Set으로 구성 (day_id와 time_slot_id 조합)
+        Set<String> currentTimeSlots = currentApplications.stream()
+                .map(app -> app.getDay().getId() + "_" + app.getTimeSlot().getId())
+                .collect(Collectors.toSet());
 
-            conflictGroups.addAll(groupsWithConflictingTimeSlot);
-        }
+        log.info("현재 신청 시간대: {}", currentTimeSlots);
 
-        return conflictGroups;
+        // APPLYING 또는 APPROVED 상태의 다른 튜터의 신청만 조회
+        List<Application> activeApplications = applicationJpaRepository.findByTutorIdNotAndApplicationGroupStatusIn(
+                tutor.getId(),
+                Arrays.asList(APPLYING, APPROVED)
+        );
+
+        log.info("활성 상태 신청 수: {}", activeApplications.size());
+
+        // 시간이 겹치는 신청 그룹 찾기
+        Set<ApplicationGroup> conflictGroups = activeApplications.stream()
+                .filter(app -> currentTimeSlots.contains(app.getDay().getId() + "_" + app.getTimeSlot().getId()))
+                .map(Application::getApplicationGroup)
+                .collect(Collectors.toSet());  // Set으로 수집하여 자동으로 중복 제거
+
+        log.info("겹치는 신청 그룹 수: {}", conflictGroups.size());
+
+        return new ArrayList<>(conflictGroups);
     }
 
     /**
