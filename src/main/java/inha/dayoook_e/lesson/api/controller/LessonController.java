@@ -4,7 +4,9 @@ import inha.dayoook_e.common.BaseResponse;
 import inha.dayoook_e.lesson.api.controller.dto.request.CancelLessonRequest;
 import inha.dayoook_e.lesson.api.controller.dto.request.CompleteLessonRequest;
 import inha.dayoook_e.lesson.api.controller.dto.request.CreateLessonScheduleRequest;
+import inha.dayoook_e.lesson.api.controller.dto.request.LessonSchedulesRequest;
 import inha.dayoook_e.lesson.api.controller.dto.response.LessonScheduleResponse;
+import inha.dayoook_e.lesson.api.controller.dto.response.LessonSchedulesResponse;
 import inha.dayoook_e.lesson.api.service.LessonService;
 import inha.dayoook_e.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,9 +17,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import static inha.dayoook_e.common.code.status.SuccessStatus.LESSON_SCHEDULE_CANCEL_OK;
-import static inha.dayoook_e.common.code.status.SuccessStatus.LESSON_SCHEDULE_COMPLETE_OK;
-import static inha.dayoook_e.common.code.status.SuccessStatus.LESSON_SCHEDULE_CREATE_OK;
+import java.util.List;
+
+import static inha.dayoook_e.common.code.status.SuccessStatus.*;
 
 
 /**
@@ -32,6 +34,20 @@ public class LessonController {
 
     private final LessonService lessonService;
 
+
+    /**
+     * 강의 일정 조회
+     *
+     * @param user 현재 로그인한 사용자
+     * @param lessonSchedulesRequest 강의 일정 조회 요청
+     * @return List<LessonSchedulesResponse>
+     */
+    @PostMapping
+    @Operation(summary = "강의 일정 조회 API", description = "튜터의 강의 일정을 조회합니다.")
+    public BaseResponse<List<LessonSchedulesResponse>> getLessonSchedules(@AuthenticationPrincipal User user,
+                                                                          @Validated @RequestBody LessonSchedulesRequest lessonSchedulesRequest) {
+        return BaseResponse.of(LESSON_SCHEDULE_GET_OK, lessonService.getLessonSchedules(user, lessonSchedulesRequest));
+    }
 
     /**
      * 강의 일정 생성

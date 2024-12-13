@@ -7,6 +7,7 @@ import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.lesson.api.controller.dto.request.*;
 import inha.dayoook_e.lesson.api.controller.dto.response.LessonResponse;
 import inha.dayoook_e.lesson.api.controller.dto.response.LessonScheduleResponse;
+import inha.dayoook_e.lesson.api.controller.dto.response.LessonSchedulesResponse;
 import inha.dayoook_e.lesson.api.controller.dto.response.MeetingResponse;
 import inha.dayoook_e.lesson.api.mapper.LessonMapper;
 import inha.dayoook_e.lesson.domain.Lesson;
@@ -15,8 +16,11 @@ import inha.dayoook_e.lesson.domain.MeetingRoom;
 import inha.dayoook_e.lesson.domain.repository.LessonJpaRepository;
 import inha.dayoook_e.lesson.domain.repository.LessonScheduleJpaRepository;
 import inha.dayoook_e.lesson.domain.repository.MeetingRoomJpaRepository;
+import inha.dayoook_e.mapping.api.mapper.MappingMapper;
 import inha.dayoook_e.mapping.domain.Day;
 import inha.dayoook_e.mapping.domain.TimeSlot;
+import inha.dayoook_e.tutor.api.controller.dto.response.SearchTutorScheduleResponse;
+import inha.dayoook_e.tutor.api.controller.dto.response.TutorScheduleData;
 import inha.dayoook_e.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +34,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.common.code.status.ErrorStatus.*;
@@ -49,6 +54,7 @@ public class LessonServiceImpl implements LessonService {
     private final LessonJpaRepository lessonJpaRepository;
     private final LessonScheduleJpaRepository lessonScheduleJpaRepository;
     private final MeetingRoomJpaRepository meetingRoomJpaRepository;
+    private final MappingMapper mappingMapper;
 
     private final RestTemplate restTemplate;
 
@@ -232,6 +238,48 @@ public class LessonServiceImpl implements LessonService {
         // 5. 수업 취소 처리
         schedule.cancel(cancelLessonRequest.reason());
         return lessonMapper.toLessonScheduleResponse(schedule, schedule.getMeetingRoom());
+    }
+
+    /**
+     * 수업 일정 조회
+     *
+     * @param user 현재 로그인한 사용자
+     * @param lessonSchedulesRequest 수업 일정 조회 요청
+     * @return List<LessonSchedulesResponse>
+     */
+    @Override
+    public List<LessonSchedulesResponse> getLessonSchedules(User user, LessonSchedulesRequest lessonSchedulesRequest) {
+        // 1. 요청된 lessonScheduleIds로 수업 일정들을 조회하고 생성일자 기준 내림차순 정렬
+        List<LessonSchedule> lessonSchedules = lessonScheduleJpaRepository
+                .findAllById(lessonSchedulesRequest.lessonScheduleIds())
+                .stream()
+                .sorted((a, b) -> b.getStartAt().compareTo(a.getStartAt()))
+                .toList();
+
+        // 2. 각 수업 일정을 LessonSchedulesResponse로 변환
+        return lessonSchedules.stream()
+                .map(schedule -> {
+                    Lesson lesson = schedule.getLesson();
+                    ApplicationGroup applicationGroup = lesson.getApplicationGroup();
+                    User tutor = applicationGroup.getTutor();
+
+
+                    // 튜터 스케줄 응답 생성
+                    SearchTutorScheduleResponse tutorSchedule = new SearchTutorScheduleResponse(
+                            tutor.getId(),
+                            tutor.getName(),
+                            null
+                    );
+
+                    // 최종 응답 생성
+                    return new LessonSchedulesResponse(
+                            lesson.getId(),
+                            schedule.getId(),
+                            tutorSchedule,
+                            schedule.getStartAt()
+                    );
+                })
+                .toList();
     }
 
     private LocalDateTime calculateNextClassTime(LocalDateTime now, String dayName, String timeSlot) {
