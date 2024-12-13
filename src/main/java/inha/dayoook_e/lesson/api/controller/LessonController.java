@@ -10,6 +10,7 @@ import inha.dayoook_e.lesson.api.controller.dto.response.LessonSchedulesResponse
 import inha.dayoook_e.lesson.api.service.LessonService;
 import inha.dayoook_e.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +61,7 @@ public class LessonController {
     @Operation(summary = "강의 일정 생성 API", description = "튜터가 강의 일정을 생성합니다.")
     public BaseResponse<LessonScheduleResponse> createLessonSchedule(
             @AuthenticationPrincipal User user,
-            @RequestHeader(value = "Authorization") String authToken,  // 헤더에서 토큰 추출
+            @Parameter(hidden = true) @RequestHeader(value = "Authorization") String authToken,  // 헤더에서 토큰 추출
             @Validated @RequestBody CreateLessonScheduleRequest createLessonScheduleRequest) {
 
         log.info("강의 일정 생성 요청: {} {}", user.getName(), createLessonScheduleRequest);
