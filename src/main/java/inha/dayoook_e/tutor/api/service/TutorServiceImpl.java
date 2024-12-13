@@ -355,6 +355,9 @@ public class TutorServiceImpl implements TutorService {
             Lesson lesson = lessonJpaRepository.findByApplicationGroupIdAndState(applicationGroup.getId(), ACTIVE)
                     .orElse(null);
 
+            log.info("!!!!!!!!!!!!!!!!1lesson: {}", lesson.getId());
+            log.info("lesson: {}", lesson.getId());
+            log.info("lesson: {}", lesson.getId());
             // SearchTutorApplicationResponse 생성
             return tutorMapper.toSearchTutorApplicationResponse(
                     applicationGroup,
