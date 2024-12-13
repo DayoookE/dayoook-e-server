@@ -152,5 +152,6 @@ public interface TutorMapper {
     @Mapping(target = "createdAt", source = "applicationGroup.createdAt")
     @Mapping(target = "status", source = "applicationGroup.status")
     @Mapping(target = "message", source = "applicationGroup.message")
-    SearchTutorApplicationResponse toSearchTutorApplicationResponse(ApplicationGroup applicationGroup, TuteeInfoResponse tuteeInfo, List<SearchLanguagesResponse> languages, List<ScheduleTimeSlot> scheduleTimeSlots);
+    @Mapping(target = "lessonId", source = "lessonId")
+    SearchTutorApplicationResponse toSearchTutorApplicationResponse(ApplicationGroup applicationGroup, TuteeInfoResponse tuteeInfo, List<SearchLanguagesResponse> languages, List<ScheduleTimeSlot> scheduleTimeSlots, Integer lessonId);
 }

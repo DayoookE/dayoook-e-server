@@ -6,6 +6,8 @@ import inha.dayoook_e.application.domain.enums.Status;
 import inha.dayoook_e.application.domain.repository.ApplicationGroupJpaRepository;
 import inha.dayoook_e.application.domain.repository.ApplicationJpaRepository;
 import inha.dayoook_e.common.exceptions.BaseException;
+import inha.dayoook_e.lesson.domain.Lesson;
+import inha.dayoook_e.lesson.domain.repository.LessonJpaRepository;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchAgeGroupResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchDayResponse;
 import inha.dayoook_e.mapping.api.controller.dto.response.SearchLanguagesResponse;
@@ -72,6 +74,7 @@ public class TutorServiceImpl implements TutorService {
     private final ApplicationGroupJpaRepository applicationGroupJpaRepository;
     private final TutorMapper tutorMapper;
     private final TutorScheduleJpaRepository tutorScheduleJpaRepository;
+    private final LessonJpaRepository lessonJpaRepository;
     private final DayJpaRepository dayJpaRepository;
     private final TimeSlotJpaRepository timeSlotJpaRepository;
     private final MappingMapper mappingMapper;
@@ -349,8 +352,11 @@ public class TutorServiceImpl implements TutorService {
                     ))
                     .toList();
 
+            Lesson lesson = lessonJpaRepository.findByApplicationGroupIdAndState(applicationGroup.getId(), ACTIVE)
+                    .orElse(null);
+
             // SearchTutorApplicationResponse 생성
-            return tutorMapper.toSearchTutorApplicationResponse(applicationGroup, tuteeInfo, languages, scheduleTimeSlots);
+            return tutorMapper.toSearchTutorApplicationResponse(applicationGroup, tuteeInfo, languages, scheduleTimeSlots, lesson.getId());
         });
     }
 
