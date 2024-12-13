@@ -135,6 +135,8 @@ public class LessonServiceImpl implements LessonService {
         // HTTP 헤더 설정
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(accessToken.replace("Bearer ", "")); // Bearer 토큰을 추가
+
         // 요청 바디 생성
         MeetingRequest meetingRequest = lessonMapper.toMeetingRequest(user.getEmail(), lesson.getApplicationGroup().getTutee().getEmail());
 
