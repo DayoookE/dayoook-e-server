@@ -19,5 +19,6 @@ public interface AuthMapper {
      * @param accessToken  JWT Access Token
      * @return LoginResponse
      */
+    @Mapping(target = "role", source = "user.role")
     LoginResponse userToLoginResponse(User user, String accessToken);
 }
