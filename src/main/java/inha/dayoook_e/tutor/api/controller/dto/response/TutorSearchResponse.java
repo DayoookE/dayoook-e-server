@@ -36,6 +36,9 @@ public record TutorSearchResponse(
     @Schema(description = "한국어 수준", example = "BEGINNER")
     KoreanLevel koreanLevel,
 
+    @Schema(description = "프로필 이미지 URL", example = "https://dayoook-e.s3.ap-northeast-2.amazonaws.com/profile/1.jpg")
+    String profileUrl,
+
     @NotNull
     List<SearchAgeGroupResponse> ageGroups,
 
