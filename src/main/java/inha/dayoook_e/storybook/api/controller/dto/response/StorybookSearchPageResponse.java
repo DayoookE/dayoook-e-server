@@ -29,10 +29,10 @@ public record StorybookSearchPageResponse(
 
         @NotNull
         @Schema(description = "총 페이지 수", example = "5")
-        Integer totalPageNumber,
+        Integer pageCount,
 
         @NotNull
         @Schema(description = "마지막으로 읽은 페이지 번호", example = "1")
-        Integer pageCount
+        Integer lastPageNumber
 ) {
 }
