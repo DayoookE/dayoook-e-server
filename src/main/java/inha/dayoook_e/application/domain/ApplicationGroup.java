@@ -21,8 +21,8 @@ import java.util.Optional;
 public class ApplicationGroup extends BaseEntity {
 
     @Id
-    @Column(name = "application_group_id", nullable = false, updatable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "application_group_id")
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
