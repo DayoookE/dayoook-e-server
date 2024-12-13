@@ -105,34 +105,46 @@ public class TutorServiceImpl implements TutorService {
         // 2. Role이 tutor인지 확인
         if (tutor.getRole().equals(TUTOR) == false)
             throw new BaseException(INVALID_ROLE);
+
         TutorInfo tutorInfo = tutor.getTutorInfo();
 
         // 2-1. 조회된 tutor의 Id로 UserLanguages 조회
         List<UserLanguage> languageList = userLanguageJpaRepository.findByUserId(tutorId);
-
         // 2-2. 조회 된 UserLanguageList를 SearchLanguageResponseList로 변환
         List<SearchLanguagesResponse> searchLanguagesResponses = languageList.stream().map(
                 userLanguage -> mappingMapper.userLanguageToSearchLanguageResponse(userLanguage)
         ).toList();
 
-
         // 3-1. 조회된 tutor의 Id로 TutorAgeGroup 조회
         List<TutorAgeGroup> ageGroupList = tutorAgeGroupJpaRepository.findByUserId(tutorId);
-
-        // 3-2. 조회된 TutorAgeGroupList를  SearchAgeGroupResponseList로 변환
+        // 3-2. 조회된 TutorAgeGroupList를 SearchAgeGroupResponseList로 변환
         List<SearchAgeGroupResponse> searchAgeGroupResponses = ageGroupList.stream().map(
                 tutorAgeGroup -> mappingMapper.toSearchAgeGroupResponse(tutorAgeGroup)
         ).toList();
 
-
         // 4-1. 조회된 tutor의 Id로 Experience 조회
         List<Experience> experienceList = experienceJpaRepository.findByUserId(tutorId);
-
         // 4-2. 조회된 ExperienceList 를 SearchExperienceResponseList로 변환
         List<SearchExperienceResponse> searchExperienceResponses = experienceList.stream().map(
                 experience -> tutorMapper.toSearchExperienceResponse(experience)
         ).toList();
-        return tutorMapper.toTutorSearchResponse(tutor, tutorInfo, searchLanguagesResponses, searchAgeGroupResponses, searchExperienceResponses);
+
+        // 5-1. 조회된 tutor의 Id로 사용 가능한 스케줄 조회
+        List<TutorSchedule> scheduleList = tutorScheduleJpaRepository.findByUserIdAndIsAvailable(tutorId, true);
+        // 5-2. 조회된 스케줄을 ScheduleTimeSlot 리스트로 변환
+        List<ScheduleTimeSlot> scheduleTimeSlots = scheduleList.stream()
+                .map(schedule -> mappingMapper.toScheduleTimeSlot(schedule.getDay().getId(), schedule.getTimeSlot().getId()
+                ))
+                .toList();
+
+        return tutorMapper.toTutorSearchResponse(
+                tutor,
+                tutorInfo,
+                searchLanguagesResponses,
+                searchAgeGroupResponses,
+                searchExperienceResponses,
+                scheduleTimeSlots
+        );
     }
 
     /**
