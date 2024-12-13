@@ -84,6 +84,7 @@ public interface TutorMapper {
     @Mapping(target = "languages", source = "userLanguageList")
     @Mapping(target = "ageGroups", source = "ageGroupList" )
     @Mapping(target = "experiences", source = "experienceList")
+    @Mapping(target = "profileUrl", source = "tutor.profileUrl")
     @Mapping(target = "id", source = "tutor.id")
     TutorSearchResponse toTutorSearchResponse(User tutor, TutorInfo tutorInfo, List<SearchLanguagesResponse> userLanguageList, List<SearchAgeGroupResponse> ageGroupList, List<SearchExperienceResponse> experienceList);
 

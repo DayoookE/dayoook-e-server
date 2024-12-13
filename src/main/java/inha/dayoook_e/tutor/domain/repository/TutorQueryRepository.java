@@ -138,6 +138,7 @@ public class TutorQueryRepository {
                             tutor.getName(),
                             info != null ? info.getRating() : 0.0,
                             tutor.getKoreanLevel(),
+                            tutor.getProfileUrl(),
                             ageGroupMap.getOrDefault(tutor.getId(), Collections.emptyList()),
                             userLanguagesMap.getOrDefault(tutor.getId(), Collections.emptyList())
                     );
