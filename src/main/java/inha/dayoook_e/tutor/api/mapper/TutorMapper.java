@@ -79,14 +79,16 @@ public interface TutorMapper {
      * @param userLanguageList 튜터 언어 리스트
      * @param ageGroupList 튜터 연령대 리스트
      * @param experienceList 튜터 경력 리스트
+     * @param schedule 튜터 일정 리스트
      * @return 튜터 검색 응답
      */
     @Mapping(target = "languages", source = "userLanguageList")
     @Mapping(target = "ageGroups", source = "ageGroupList" )
     @Mapping(target = "experiences", source = "experienceList")
     @Mapping(target = "profileUrl", source = "tutor.profileUrl")
+    @Mapping(target = "schedule", source = "schedule")
     @Mapping(target = "id", source = "tutor.id")
-    TutorSearchResponse toTutorSearchResponse(User tutor, TutorInfo tutorInfo, List<SearchLanguagesResponse> userLanguageList, List<SearchAgeGroupResponse> ageGroupList, List<SearchExperienceResponse> experienceList);
+    TutorSearchResponse toTutorSearchResponse(User tutor, TutorInfo tutorInfo, List<SearchLanguagesResponse> userLanguageList, List<SearchAgeGroupResponse> ageGroupList, List<SearchExperienceResponse> experienceList, List<ScheduleTimeSlot> schedule);
 
     /**
      * 경력 조회 응답 dto 생성

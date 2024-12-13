@@ -15,4 +15,6 @@ import java.util.Optional;
  */
 public interface TutorScheduleJpaRepository extends JpaRepository<TutorSchedule, TutorScheduleId> {
     List<TutorSchedule> findByUserId(Integer id);
+
+    List<TutorSchedule> findByUserIdAndIsAvailable(Integer tutorId, boolean isAvailable);
 }
