@@ -343,28 +343,35 @@ public class TutorServiceImpl implements TutorService {
 
             // 튜티 언어 정보 변환
             List<SearchLanguagesResponse> languages = applicationGroup.getTutee().getUserLanguages().stream()
-                    .map(userLanguage -> mappingMapper.toSearchLanguagesResponse(userLanguage.getLanguage().getId(), userLanguage.getLanguage().getName()))
+                    .map(userLanguage -> mappingMapper.toSearchLanguagesResponse(
+                            userLanguage.getLanguage().getId(),
+                            userLanguage.getLanguage().getName()))
                     .toList();
 
             // 신청 시간대 정보 변환
             List<ScheduleTimeSlot> scheduleTimeSlots = applicationGroup.getApplications().stream()
-                    .map(application -> mappingMapper.toScheduleTimeSlot(application.getDay().getId(), application.getTimeSlot().getId()
-                    ))
+                    .map(application -> mappingMapper.toScheduleTimeSlot(
+                            application.getDay().getId(),
+                            application.getTimeSlot().getId()))
                     .toList();
 
             Lesson lesson = lessonJpaRepository.findByApplicationGroupIdAndState(applicationGroup.getId(), ACTIVE)
                     .orElse(null);
 
-            log.info("!!!!!!!!!!!!!!!!1lesson: {}", lesson.getId());
-            log.info("lesson: {}", lesson.getId());
-            log.info("lesson: {}", lesson.getId());
+            if (lesson != null) {
+                log.info("lesson id: {}", lesson.getId());
+            } else {
+                log.info("lesson is null");
+            }
+
             // SearchTutorApplicationResponse 생성
             return tutorMapper.toSearchTutorApplicationResponse(
                     applicationGroup,
                     tuteeInfo,
                     languages,
                     scheduleTimeSlots,
-                    lesson != null ? lesson.getId() : null); // Handle potential null lesson
+                    lesson != null ? lesson.getId() : null
+            );
         });
     }
 
