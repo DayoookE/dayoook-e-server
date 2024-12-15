@@ -355,14 +355,9 @@ public class TutorServiceImpl implements TutorService {
                             application.getTimeSlot().getId()))
                     .toList();
 
+            // lesson 조회 및 ID 반환 (있으면 ID, 없으면 null)
             Lesson lesson = lessonJpaRepository.findByApplicationGroupIdAndState(applicationGroup.getId(), ACTIVE)
                     .orElse(null);
-
-            if (lesson != null) {
-                log.info("lesson id: {}", lesson.getId());
-            } else {
-                log.info("lesson is null");
-            }
 
             // SearchTutorApplicationResponse 생성
             return tutorMapper.toSearchTutorApplicationResponse(
