@@ -5,6 +5,7 @@ import inha.dayoook_e.lesson.api.controller.dto.request.CancelLessonRequest;
 import inha.dayoook_e.lesson.api.controller.dto.request.CompleteLessonRequest;
 import inha.dayoook_e.lesson.api.controller.dto.request.CreateLessonScheduleRequest;
 import inha.dayoook_e.lesson.api.controller.dto.request.LessonSchedulesRequest;
+import inha.dayoook_e.lesson.api.controller.dto.response.LessonMeetingResponse;
 import inha.dayoook_e.lesson.api.controller.dto.response.LessonScheduleResponse;
 import inha.dayoook_e.lesson.api.controller.dto.response.LessonSchedulesResponse;
 import inha.dayoook_e.lesson.api.service.LessonService;
@@ -48,6 +49,20 @@ public class LessonController {
     public BaseResponse<List<LessonSchedulesResponse>> getLessonSchedules(@AuthenticationPrincipal User user,
                                                                           @Validated @RequestBody LessonSchedulesRequest lessonSchedulesRequest) {
         return BaseResponse.of(LESSON_SCHEDULE_GET_OK, lessonService.getLessonSchedules(user, lessonSchedulesRequest));
+    }
+
+    /**
+     * 생성된 강의 링크 조회
+     *
+     * @param user 현재 로그인한 사용자
+     * @param lessonId 강의 ID
+     * @return LessonMeetingResponse
+     */
+    @GetMapping("/{lessonId}")
+    @Operation(summary = "생성된 강의 링크 조회 API", description = "생성된 튜터의 강의 링크를 조회합니다.")
+    public BaseResponse<LessonMeetingResponse> getLessonMeetingResponse(@AuthenticationPrincipal User user,
+                                                                            @PathVariable("lessonId") Integer lessonId) {
+        return BaseResponse.of(LESSON_MEETING_GET_OK, lessonService.getLessonMeetingResponse(user, lessonId));
     }
 
     /**

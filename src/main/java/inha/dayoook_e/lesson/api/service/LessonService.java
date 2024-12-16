@@ -1,6 +1,7 @@
 package inha.dayoook_e.lesson.api.service;
 
 import inha.dayoook_e.lesson.api.controller.dto.request.*;
+import inha.dayoook_e.lesson.api.controller.dto.response.LessonMeetingResponse;
 import inha.dayoook_e.lesson.api.controller.dto.response.LessonResponse;
 import inha.dayoook_e.lesson.api.controller.dto.response.LessonScheduleResponse;
 import inha.dayoook_e.lesson.api.controller.dto.response.LessonSchedulesResponse;
@@ -17,4 +18,5 @@ public interface LessonService {
     LessonScheduleResponse cancelLessonSchedule(User user, Integer scheduleId, CancelLessonRequest cancelLessonRequest);
     List<LessonSchedulesResponse> getLessonSchedules(User user, LessonSchedulesRequest lessonSchedulesRequest);
 
+    LessonMeetingResponse getLessonMeetingResponse(User user, Integer lessonId);
 }

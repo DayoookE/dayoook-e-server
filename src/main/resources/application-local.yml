@@ -49,3 +49,9 @@ cloud:
 fastapi:
   server:
     url: http://localhost:6262
+
+
+
+papago:
+  client-id: ${PAPAGO_CLIENT_ID}
+  client-secret: ${PAPAGO_CLIENT_SECRET}
