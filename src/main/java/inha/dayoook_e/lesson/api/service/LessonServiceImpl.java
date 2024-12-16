@@ -5,14 +5,12 @@ import inha.dayoook_e.application.domain.ApplicationGroup;
 import inha.dayoook_e.application.domain.repository.ApplicationGroupJpaRepository;
 import inha.dayoook_e.common.exceptions.BaseException;
 import inha.dayoook_e.lesson.api.controller.dto.request.*;
-import inha.dayoook_e.lesson.api.controller.dto.response.LessonResponse;
-import inha.dayoook_e.lesson.api.controller.dto.response.LessonScheduleResponse;
-import inha.dayoook_e.lesson.api.controller.dto.response.LessonSchedulesResponse;
-import inha.dayoook_e.lesson.api.controller.dto.response.MeetingResponse;
+import inha.dayoook_e.lesson.api.controller.dto.response.*;
 import inha.dayoook_e.lesson.api.mapper.LessonMapper;
 import inha.dayoook_e.lesson.domain.Lesson;
 import inha.dayoook_e.lesson.domain.LessonSchedule;
 import inha.dayoook_e.lesson.domain.MeetingRoom;
+import inha.dayoook_e.lesson.domain.enums.Status;
 import inha.dayoook_e.lesson.domain.repository.LessonJpaRepository;
 import inha.dayoook_e.lesson.domain.repository.LessonScheduleJpaRepository;
 import inha.dayoook_e.lesson.domain.repository.MeetingRoomJpaRepository;
@@ -35,6 +33,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static inha.dayoook_e.common.BaseEntity.State.ACTIVE;
 import static inha.dayoook_e.common.code.status.ErrorStatus.*;
@@ -282,6 +281,40 @@ public class LessonServiceImpl implements LessonService {
                     );
                 })
                 .toList();
+    }
+
+    /**
+     * 생성된 강의 링크 조회
+     *
+     * @param user 현재 로그인한 사용자
+     * @param lessonId 강의 ID
+     * @return LessonMeetingResponse
+     */
+    @Override
+    public LessonMeetingResponse getLessonMeetingResponse(User user, Integer lessonId) {
+        // 1. lessonId로 lesson 조회
+        Lesson lesson = lessonJpaRepository.findById(lessonId)
+                .orElseThrow(() -> new BaseException(LESSON_NOT_FOUND));
+
+        // 2. lesson에 연결된 LessonSchedule 중 SCHEDULED 상태이면서 가장 최근 것 조회
+        Optional<LessonSchedule> latestSchedule = lessonScheduleJpaRepository
+                .findFirstByLessonAndStatusOrderByStartAtDesc(lesson, Status.SCHEDULED);
+
+        // 3. 스케줄이 없으면 null 반환
+        if (latestSchedule.isEmpty()) {
+            return null;
+        }
+
+        // 4. MeetingRoom 정보 포함하여 응답 생성
+        LessonSchedule schedule = latestSchedule.get();
+        MeetingRoom meetingRoom = schedule.getMeetingRoom();
+
+        return new LessonMeetingResponse(
+                schedule.getId(),
+                meetingRoom != null ? meetingRoom.getRoomUrl() : null,
+                meetingRoom != null ? meetingRoom.getCreatedAt() : null,
+                schedule.getStatus()
+        );
     }
 
     private LocalDateTime calculateNextClassTime(LocalDateTime now, String dayName, String timeSlot) {

@@ -51,6 +51,7 @@ public enum SuccessStatus implements BaseCode {
     LESSON_SCHEDULE_CREATE_OK(HttpStatus.CREATED, "LESSON2000", "강의 일정 생성 성공"),
     LESSON_SCHEDULE_COMPLETE_OK(HttpStatus.OK, "LESSON2001", "강의 완료 처리 성공"),
     LESSON_SCHEDULE_CANCEL_OK(HttpStatus.OK, "LESSON4008", "강의 취소 처리 성공"),
+    LESSON_MEETING_GET_OK(HttpStatus.OK, "LESSON2002", "강의 링크 조회 성공"),
 
     TUTEE_APPLICATION_SEARCH_OK(HttpStatus.OK, "TUTEE2000", "튜티 신청 목록 조회 성공"),
     TUTEE_SCHEDULE_SEARCH_OK(HttpStatus.OK, "TUTEE2001", "튜티 스케줄 조회 성공"),

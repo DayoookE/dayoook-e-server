@@ -28,4 +28,9 @@ public interface LessonScheduleJpaRepository extends JpaRepository<LessonSchedul
             LocalDateTime endAt
     );
 
+    Optional<LessonSchedule> findFirstByLessonAndStatusOrderByStartAtDesc(
+            Lesson lesson,
+            Status status
+    );
+
 }
