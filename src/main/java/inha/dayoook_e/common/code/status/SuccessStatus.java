@@ -55,6 +55,9 @@ public enum SuccessStatus implements BaseCode {
     TUTEE_APPLICATION_SEARCH_OK(HttpStatus.OK, "TUTEE2000", "튜티 신청 목록 조회 성공"),
     TUTEE_SCHEDULE_SEARCH_OK(HttpStatus.OK, "TUTEE2001", "튜티 스케줄 조회 성공"),
 
+    //파파고 번역 성공
+    PAPAGO_TRANSLATE_OK(HttpStatus.OK, "PAPAGO2000", "파파고 번역 성공"),
+
     LANGUAGES_SEARCH_OK(HttpStatus.OK, "MAPPING2000", "언어 목록 조회 성공"),
     COUNTRIES_SEARCH_OK(HttpStatus.OK, "MAPPING2001", "국가 목록 조회 성공"),
     AGE_GROUPS_SEARCH_OK(HttpStatus.OK, "MAPPING2002", "연령대 목록 조회 성공"),

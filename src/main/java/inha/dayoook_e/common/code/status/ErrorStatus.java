@@ -70,6 +70,8 @@ public enum ErrorStatus implements BaseErrorCode {
     LESSON_ALREADY_STARTED(HttpStatus.BAD_REQUEST, "LESSON4009", "이미 시작된 강의입니다."),
     MEETING_ROOM_CREATION_FAILED(HttpStatus.BAD_REQUEST, "LESSON4010", "회의실 생성에 실패하였습니다."),
 
+    TRANSLATION_FAILED(HttpStatus.BAD_REQUEST, "PAPAGO4000", "번역에 실패하였습니다."),
+
     EMPTY_JWT(HttpStatus.UNAUTHORIZED, "JWT4000", "JWT를 입력해주세요"),
     INVALID_JWT(HttpStatus.UNAUTHORIZED, "JWT4001", "유효하지 않은 JWT입니다."),
     INVALID_USER_JWT(HttpStatus.FORBIDDEN, "JWT4002", "권한이 없는 유저의 접근입니다."),
