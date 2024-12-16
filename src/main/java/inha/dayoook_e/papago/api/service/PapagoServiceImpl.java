@@ -44,6 +44,7 @@ public class PapagoServiceImpl implements  PapagoService {
         body.add("source", request.source());
         body.add("target", request.target());
         body.add("text", request.text());
+        body.add("honorific", "true");
 
         HttpEntity<MultiValueMap<String, String>> requestEntity =
                 new HttpEntity<>(body, headers);
