@@ -12,6 +12,8 @@ public record LessonSchedulesResponse(
 
         SearchTutorScheduleResponse tutorSchedule,
 
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+
+        TuteeInfoResponse tuteeInfo
 ) {
 }

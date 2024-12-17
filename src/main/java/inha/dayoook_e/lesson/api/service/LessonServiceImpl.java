@@ -272,12 +272,18 @@ public class LessonServiceImpl implements LessonService {
                             null
                     );
 
+                    TuteeInfoResponse tuteeInfo = new TuteeInfoResponse(
+                            applicationGroup.getTutee().getId(),
+                            applicationGroup.getTutee().getName()
+                    );
+
                     // 최종 응답 생성
                     return new LessonSchedulesResponse(
                             lesson.getId(),
                             schedule.getId(),
                             tutorSchedule,
-                            schedule.getStartAt()
+                            schedule.getStartAt(),
+                            tuteeInfo
                     );
                 })
                 .toList();
