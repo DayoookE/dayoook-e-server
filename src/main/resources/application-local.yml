@@ -1,0 +1,57 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+  application:
+    name: dayook-e
+  datasource:
+    url: jdbc:mysql://localhost:3306/${LOCAL_DB_NAME}?useUnicode=yes&characterEncoding=UTF-8&autoReconnect=true&setTimezone=Asia/Seoul # 변경해주세요
+    username: ${LOCAL_DB_USERNAME}
+    password: ${LOCAL_DB_PW}
+    driver-class-name: com.mysql.cj.jdbc.Driver # mysql 8버전
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    generate-ddl: false
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 1000
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+jwt:
+  issuer: dayoook@dayoook.com
+  secret_key: ${JWT_SECRET_KEY}
+  expiration: 864000000
+
+
+cloud:
+  aws:
+    s3:
+      bucket: ${S3_BUCKET}
+    stack:
+      auto: false
+    region:
+      static: ap-northeast-2
+    credentials:
+      instance-profile: true
+      accessKey: ${S3_ACCESSKEY}
+      secretKey: ${S3_SECRETKEY}
+
+
+fastapi:
+  server:
+    url: http://localhost:6262
+
+
+
+papago:
+  client-id: ${PAPAGO_CLIENT_ID}
+  client-secret: ${PAPAGO_CLIENT_SECRET}
