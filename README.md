@@ -140,6 +140,41 @@
 
 ## 💻 실행 방법
 
+### Client 실행
+
+1. **원격 저장소 복제**
+
+```bash
+$ git clone https://github.com/DayoookE/dayoook-e-client
+```
+
+2. **프로젝트 폴더로 이동**
+
+3. **필요한 node_modules 설치**
+
+```bash
+$ npm install
+```
+
+4. **.env 파일 생성**
+
+```bash
+$ vi .env
+```
+
+```bash
+REACT_APP_FAST_API_URL=[IP]:[PORT]
+REACT_APP_SPRING_API_URL=[IP]:[PORT]
+REACT_APP_S3_BUCKET=[BUCKET]
+
+```
+
+5. **개발 서버 실행**
+
+```bash
+$ npm start
+```
+
 
 ### Spring Server 실행
 
@@ -243,4 +278,48 @@ $ java -jar [파일명].jar
 
 <br />
 
+### FastAPI Server 실행
 
+1. **원격 저장소 복제**
+
+```bash
+$ git clone https://github.com/DayoookE/dayoook-e-fastapi-server.git
+```
+
+2. **프로젝터 폴더 촤상단으로 이동 후 .env 파일 생성**
+
+```bash
+$ vi .env
+```
+
+```bash
+
+DB_NAME=[디비이름]
+DB_USERNAME=[디비유저]
+DB_PASSWORD=[디비패스워드]
+DB_HOST=[디비호스트]
+DB_PORT=[디비포트]
+SPRING_SERVER_URL=[IP][PORT]
+JWT_SECURITY_KEY=[시크릿키]
+CLOVA_SECRETKEY=[시크릿키]
+CLOVA_INVOKE_URL=[URL]
+AWS_S3_ACCESS_KEY=[엑세스키]
+AWS_S3_SECRET_KEY=[시크릿키]
+S3_RECORD_UPLOAD_DIR=[경로]
+S3_SCRIPT_UPLOAD_DIR=[경로]
+S3_BUCKET_NAME=[버킷이름]
+OPENAI_API_KEY=[API키]
+
+FILE=[파일경로]
+FEEDBACK_OPENAI_API_KEY=[API키]
+```
+
+3. **Google Cloud Platform(GCP)에서 OAuth 2.0 인증울 위한 josn 파일을 다운로드하여 최상단에 넣음**
+
+4. **로컬 경로를 지정하여 저장된 사전학습 모델 로드**
+
+5. **도커 실행**
+
+```bash
+$ docker run -v $(pwd)/container:/server --gpus all --name [CONTAINER_NAME] -p 6262:6262 [IMAGE_NAME:IMAGE_TAG] 
+```
