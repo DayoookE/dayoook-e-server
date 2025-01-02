@@ -22,6 +22,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	runtimeOnly 'com.mysql:mysql-connector-j'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -41,7 +42,7 @@ dependencies {
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
 	testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
 	implementation("org.mapstruct:mapstruct:1.5.3.Final")
-	implementation("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+	annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
 
 	// Querydsl
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
@@ -61,4 +62,25 @@ tasks.named('test') {
 
 jar {
 	enabled = false
+}
+
+javadoc {
+	options {
+		encoding = 'UTF-8'
+		charSet = 'UTF-8'
+		author = true
+		version = true
+		links = ['https://docs.oracle.com/en/java/javase/17/docs/api/']
+		title = "Dayook-e Server API Documentation"
+		addStringOption('Xdoclint:none', '-quiet')
+		addBooleanOption('html5', true)
+	}
+	// 소스 파일 인코딩 설정
+	options.encoding = 'UTF-8'
+}
+
+tasks.register('copyDoc', Copy) {
+	dependsOn 'javadoc'
+	from "$buildDir/docs/javadoc"
+	into "$projectDir/docs"
 }
